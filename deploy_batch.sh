@@ -1,5 +1,6 @@
-#!/usr/bin/env bash
 set -e
+
+cd "$(System.DefaultWorkingDirectory)/_kgb"
 
 mkdir -p .vercel
 
