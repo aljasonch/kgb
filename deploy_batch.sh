@@ -14,7 +14,6 @@ EOF
 echo "Created .vercel/project.json:"
 cat .vercel/project.json
 
-# 3. Install vercel dan deploy (sama dengan YAML)
 npm install -g vercel@latest
 
 echo "Using Vercel project: $PROJECT_ID"
