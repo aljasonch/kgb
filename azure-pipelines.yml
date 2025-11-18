@@ -17,19 +17,10 @@ steps:
 - bash: |
     set -e
     mkdir -p .vercel
-    if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
-      TARGET_PROJECT_ID="$PROD_PROJECT_ID"
-      TARGET_ENVIRONMENT="production"
-      echo "Target: main -> Production"
-    elif [ "$BUILD_SOURCEBRANCHNAME" = "develop" ]; then
-      TARGET_PROJECT_ID="$DEV_PROJECT_ID"
-      TARGET_ENVIRONMENT="production"
-      echo "Target: develop -> Development"
-    fi
 
     cat > .vercel/project.json <<EOF
     {
-      "projectId": "$TARGET_PROJECT_ID",
+      "projectId": "$PROJECT_ID",
       "orgId": "$ORG_ID"
     }
     EOF
@@ -38,13 +29,12 @@ steps:
     cat .vercel/project.json
   env:
     ORG_ID: $(ORG_ID)
-    PROD_PROJECT_ID: $(PROD_PROJECT_ID)
-    DEV_PROJECT_ID: $(DEV_PROJECT_ID)
-    BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
-  displayName: 'Generate .vercel/project.json (per branch)'
+    PROJECT_ID: $(PROJECT_ID)
+  displayName: "Generate .vercel/project.json"
 
 - bash: |
     set -e
+
     npm install -g vercel@latest
 
     vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
@@ -55,4 +45,5 @@ steps:
     NPM_CONFIG_PREFIX: $(NPM_CONFIG_PREFIX)
     PATH: $(PATH)
     VERCEL_TOKEN: $(VERCEL_TOKEN)
-  displayName: 'Build & Deploy to Vercel'
+    PROJECT_ID: $(PROJECT_ID)
+  displayName: "Build & Deploy to Vercel"
