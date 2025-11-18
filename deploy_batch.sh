@@ -1,6 +1,10 @@
+#!/usr/bin/env bash
 set -e
 
-cd "$(System.DefaultWorkingDirectory)/_kgb"
+echo "PWD now:"
+pwd
+echo "List files:"
+ls
 
 mkdir -p .vercel
 
