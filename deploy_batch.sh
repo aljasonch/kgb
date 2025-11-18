@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "PWD now:"
-pwd
-echo "List files:"
-ls
+cd _kgb
 
 mkdir -p .vercel
 
