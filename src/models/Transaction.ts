@@ -105,9 +105,21 @@ TransactionSchema.index({
   tanggal: -1
 });
 
-TransactionSchema.post<ITransaction>('save', async function (doc: ITransaction, next: (error?: Error) => void) { 
+type TransactionWithLocals = ITransaction & { $locals?: { skipStockAdjustment?: boolean } };
+
+TransactionSchema.post<ITransaction>('save', async function (doc: TransactionWithLocals, next: (error?: Error) => void) { 
   try {
-    const item = await mongoose.model<IItem>('Item').findById(doc.item);
+    if (doc?.$locals?.skipStockAdjustment) {
+      return next();
+    }
+
+    const session = typeof doc.$session === 'function' ? doc.$session() : null;
+    const itemQuery = mongoose.model<IItem>('Item').findById(doc.item);
+    if (session) {
+      itemQuery.session(session);
+    }
+
+    const item = await itemQuery;
     if (item) {
       if (doc.tipe === TransactionType.PENJUALAN) {
         item.stokSaatIni -= doc.berat;
