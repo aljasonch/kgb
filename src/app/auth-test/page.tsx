@@ -17,7 +17,7 @@ export default function TokenRefreshTest() {
         method: 'POST',
         credentials: 'include'
       });
-      
+
       if (response.ok) {
         const _data = await response.json();
         setRefreshStatus('Refresh successful');
@@ -34,7 +34,7 @@ export default function TokenRefreshTest() {
     setTestApiCallResult('Testing...');
     try {
       const response = await fetchWithAuth('/api/items');
-      
+
       if (response.ok) {
         const _data = await response.json();
         setTestApiCallResult(`API call successful: ${_data.items?.length || 0} items retrieved`);
@@ -47,13 +47,13 @@ export default function TokenRefreshTest() {
   };
 
   const [tokenExpiration, setTokenExpiration] = useState<string>('Unknown');
-  
+
   useEffect(() => {
     const checkTokenExpiration = () => {
       const tokenCookie = document.cookie
         .split('; ')
         .find(row => row.startsWith('token='));
-        
+
       if (tokenCookie) {
         try {
           const token = tokenCookie.split('=')[1];
@@ -72,7 +72,7 @@ export default function TokenRefreshTest() {
         setTokenExpiration('No token cookie found');
       }
     };
-    
+
     checkTokenExpiration();
     const interval = setInterval(checkTokenExpiration, 1000);
     return () => clearInterval(interval);
@@ -81,38 +81,38 @@ export default function TokenRefreshTest() {
   return (
     <div className="container mx-auto p-4 max-w-3xl">
       <h1 className="text-2xl font-bold mb-6">Authentication Token Test Page</h1>
-      
-      <div className="bg-white shadow overflow-hidden rounded-lg mb-6">
+
+      <div className="bg-[color:var(--card-bg)] shadow overflow-hidden rounded-lg mb-6 border border-[color:var(--border-color)]">
         <div className="px-4 py-5 sm:px-6">
           <h2 className="text-lg font-medium">Authentication Status</h2>
         </div>
-        <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <div className="border-t border-[color:var(--border-color)] px-4 py-5 sm:px-6">
           <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Authentication Status</dt>
-              <dd className="mt-1 text-sm text-gray-900">{isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</dd>
+              <dt className="text-sm font-medium text-[color:var(--muted)]">Authentication Status</dt>
+              <dd className="mt-1 text-sm text-[color:var(--foreground)]">{isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">User</dt>
-              <dd className="mt-1 text-sm text-gray-900">{user ? user.email : 'No user'}</dd>
+              <dt className="text-sm font-medium text-[color:var(--muted)]">User</dt>
+              <dd className="mt-1 text-sm text-[color:var(--foreground)]">{user ? user.email : 'No user'}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Token Expiration</dt>
-              <dd className="mt-1 text-sm text-gray-900">{tokenExpiration}</dd>
+              <dt className="text-sm font-medium text-[color:var(--muted)]">Token Expiration</dt>
+              <dd className="mt-1 text-sm text-[color:var(--foreground)]">{tokenExpiration}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Last Manual Refresh</dt>
-              <dd className="mt-1 text-sm text-gray-900">{lastRefreshTime}</dd>
+              <dt className="text-sm font-medium text-[color:var(--muted)]">Last Manual Refresh</dt>
+              <dd className="mt-1 text-sm text-[color:var(--foreground)]">{lastRefreshTime}</dd>
             </div>
           </dl>
         </div>
       </div>
-      
-      <div className="bg-white shadow overflow-hidden rounded-lg mb-6">
+
+      <div className="bg-[color:var(--card-bg)] shadow overflow-hidden rounded-lg mb-6 border border-[color:var(--border-color)]">
         <div className="px-4 py-5 sm:px-6">
           <h2 className="text-lg font-medium">Token Refresh Test</h2>
         </div>
-        <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+        <div className="border-t border-[color:var(--border-color)] px-4 py-5 sm:px-6">
           <p className="mb-4">Status: <span className="font-medium">{refreshStatus}</span></p>
           <button
             onClick={handleManualRefresh}
@@ -122,8 +122,8 @@ export default function TokenRefreshTest() {
           </button>
         </div>
       </div>
-      
-      <div className="bg-white shadow overflow-hidden rounded-lg">
+
+      <div className="bg-[color:var(--card-bg)] shadow overflow-hidden rounded-lg border border-[color:var(--border-color)]">
         <div className="px-4 py-5 sm:px-6">
           <h2 className="text-lg font-medium">API Call Test</h2>
         </div>
@@ -137,8 +137,8 @@ export default function TokenRefreshTest() {
           </button>
         </div>
       </div>
-      
-      <div className="mt-6 text-sm text-gray-600">
+
+      <div className="mt-6 text-sm text-[color:var(--muted)]">
         <p className="mb-2">Understanding Token Refresh:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li>The server sets a JWT token that expires after 15 minutes</li>

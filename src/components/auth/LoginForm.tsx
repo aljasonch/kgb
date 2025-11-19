@@ -8,7 +8,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,15 +44,12 @@ export default function LoginForm() {
     }
   };
 
-  const inputBaseClasses = "block w-full px-3 py-2.5 rounded-md shadow-sm sm:text-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)]";
-  const labelBaseClasses = "block text-sm font-medium text-[color:var(--foreground)] opacity-90";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6  p-6 sm:p-8 rounded-lg">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label
           htmlFor="email"
-          className={labelBaseClasses}
+          className="form-label"
         >
           Email address
         </label>
@@ -65,7 +62,8 @@ export default function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={inputBaseClasses}
+            className="form-input"
+            placeholder="Enter your email"
           />
         </div>
       </div>
@@ -73,7 +71,7 @@ export default function LoginForm() {
       <div>
         <label
           htmlFor="password"
-          className={labelBaseClasses}
+          className="form-label"
         >
           Password
         </label>
@@ -86,20 +84,23 @@ export default function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={inputBaseClasses}
+            className="form-input"
+            placeholder="Enter your password"
           />
         </div>
       </div>
 
       {error && (
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          {error}
+        </div>
       )}
 
       <div>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full cursor-pointer flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
+          className="w-full btn-primary justify-center disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
