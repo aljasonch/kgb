@@ -5,7 +5,7 @@ import SalesReportTable from '@/components/reports/SalesReportTable';
 import { ITransaction } from '@/models/Transaction';
 import { IItem } from '@/models/Item';
 import { useState, useEffect, useCallback } from 'react';
-import { fetchWithAuth } from '@/lib/fetchWithAuth'; 
+import { fetchWithAuth } from '@/lib/fetchWithAuth';
 
 interface FilterState {
   view?: string;
@@ -26,19 +26,19 @@ export default function SalesReportPage() {
 
   const [items, setItems] = useState<IItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
-  const [itemsError, setItemsError] = useState<string | null>(null);  useEffect(() => {
+  const [itemsError, setItemsError] = useState<string | null>(null); useEffect(() => {
     const fetchItems = async () => {
       setIsLoadingItems(true);
       setItemsError(null);
       try {
-        const response = await fetchWithAuth('/api/items?fetchAll=true'); 
+        const response = await fetchWithAuth('/api/items?fetchAll=true');
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.message || 'Failed to fetch items for filters');
         }
         const data = await response.json();
         setItems(data.items || []);
-      } catch (err: unknown) { 
+      } catch (err: unknown) {
         setItemsError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
         setIsLoadingItems(false);
@@ -47,7 +47,7 @@ export default function SalesReportPage() {
     fetchItems();
   }, []);
 
-  const fetchReportData = useCallback(async (currentFilters: FilterState) => { 
+  const fetchReportData = useCallback(async (currentFilters: FilterState) => {
     setIsLoadingReport(true);
     setReportError(null);
 
@@ -59,7 +59,7 @@ export default function SalesReportPage() {
     if (currentFilters.itemId) queryParams.append('itemId', currentFilters.itemId);
     if (currentFilters.startDate) queryParams.append('startDate', currentFilters.startDate);
     if (currentFilters.endDate) queryParams.append('endDate', currentFilters.endDate);
-    if (currentFilters.noSjType) queryParams.append('noSjType', currentFilters.noSjType); 
+    if (currentFilters.noSjType) queryParams.append('noSjType', currentFilters.noSjType);
 
     try {
       const response = await fetchWithAuth(`/api/reports/sales?${queryParams.toString()}`);
@@ -79,7 +79,7 @@ export default function SalesReportPage() {
 
   useEffect(() => {
     if (Object.keys(filters).length > 0) {
-        fetchReportData(filters);
+      fetchReportData(filters);
     }
   }, [filters, fetchReportData]);
 
@@ -105,7 +105,7 @@ export default function SalesReportPage() {
   return (
     <div className="container mx-auto p-4">
       <header className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-        <h1 className="text-3xl font-bold text-gray-900">Laporan Penjualan</h1>
+        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Laporan Penjualan</h1>
         <button
           onClick={handleExport}
           disabled={isLoadingReport || reportData.length === 0}
@@ -117,18 +117,18 @@ export default function SalesReportPage() {
 
       <div className="mb-6">
         {itemsError && <p className="text-red-500">Error loading items for filter: {itemsError}</p>}
-        <SalesReportFilters 
-            onFilterChange={handleFilterChange} 
-            items={items} 
-            isLoadingItems={isLoadingItems} 
+        <SalesReportFilters
+          onFilterChange={handleFilterChange}
+          items={items}
+          isLoadingItems={isLoadingItems}
         />
       </div>
 
       <div>
-        <SalesReportTable 
-            reportData={reportData} 
-            isLoading={isLoadingReport} 
-            error={reportError} 
+        <SalesReportTable
+          reportData={reportData}
+          isLoading={isLoadingReport}
+          error={reportError}
         />
       </div>
     </div>
