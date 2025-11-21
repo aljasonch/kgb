@@ -467,7 +467,7 @@ export default function AccountsPage() {
         {balanceFormSuccess && <p className="text-sm text-green-500">{balanceFormSuccess}</p>}
         <button
           type="submit"
-          className="px-4 py-2 bg-[color:var(--primary)] hover:bg-[color:var(--btn-hover-bg-primary)] cursor-pointer text-white rounded-md text-sm font-medium"
+          className="px-4 py-2 bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] cursor-pointer text-white rounded-md text-sm font-medium"
         >
           Simpan Saldo Awal
         </button>
