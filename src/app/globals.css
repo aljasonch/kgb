@@ -46,7 +46,7 @@
   --accent: #7c3aed;
   /* Violet 600 */
 
-  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-bg: rgba(255, 255, 255, 0.95);
   --card-border: rgba(0, 0, 0, 0.1);
 
   --surface: rgba(241, 245, 249, 0.8);
@@ -79,7 +79,7 @@
   --secondary-hover: #db2777;
   --secondary-foreground: #ffffff;
   --accent: #8b5cf6;
-  --card-bg: rgba(30, 41, 59, 0.7);
+  --card-bg: rgba(30, 41, 59, 0.95);
   --card-border: rgba(255, 255, 255, 0.1);
   --surface: rgba(15, 23, 42, 0.5);
   --surface-hover: rgba(30, 41, 59, 0.8);
