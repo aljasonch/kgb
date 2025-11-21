@@ -5,7 +5,7 @@ import { ITransaction } from '@/models/Transaction';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fetchWithAuth } from '@/lib/fetchWithAuth'; 
+import { fetchWithAuth } from '@/lib/fetchWithAuth';
 
 export default function EditTransactionPage() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function EditTransactionPage() {
   }, [id]);
 
   const handleTransactionUpdated = () => {
-    router.push('/transactions'); 
+    router.push('/transactions');
   };
 
   if (isLoading) {
@@ -65,22 +65,22 @@ export default function EditTransactionPage() {
 
   if (!transaction) {
     return (
-        <div className="text-center text-gray-500 py-8">
-            <p>Transaction not found.</p>
-            <Link href="/transactions" legacyBehavior>
-            <a className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block">
-                Back to Transactions
-            </a>
-            </Link>
-        </div>
+      <div className="text-center text-gray-500 py-8">
+        <p>Transaction not found.</p>
+        <Link href="/transactions" legacyBehavior>
+          <a className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block">
+            Back to Transactions
+          </a>
+        </Link>
+      </div>
     );
   }
 
   return (
     <div className="container mx-auto p-4">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Edit Transaksi</h1>
-        <p className="text-sm text-gray-600">ID Transaksi: {id}</p>
+        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Edit Transaksi</h1>
+        <p className="text-sm text-[color:var(--muted)]">ID Transaksi: {id}</p>
       </header>
       <TransactionForm
         onTransactionAdded={handleTransactionUpdated}

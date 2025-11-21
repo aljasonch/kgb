@@ -58,9 +58,9 @@ export default function AccountsPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentCustomerName, setPaymentCustomerName] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
-  
+
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [paymentNotes, setPaymentNotes] = useState('');  
+  const [paymentNotes, setPaymentNotes] = useState('');
   const [paymentFormError, setPaymentFormError] = useState<string | null>(null);
   const [paymentFormSuccess, setPaymentFormSuccess] = useState<string | null>(null);
 
@@ -228,22 +228,23 @@ export default function AccountsPage() {
       setInitialBalanceValue('');
       fetchData();
     } catch (err: unknown) {
-      setBalanceFormError(err instanceof Error ? err.message : 'Terjadi kesalahan.');    }
+      setBalanceFormError(err instanceof Error ? err.message : 'Terjadi kesalahan.');
+    }
   };
 
   const fetchPaymentHistory = async (customerName: string) => {
     setIsLoadingPaymentHistory(true);
     setPaymentHistoryError(null);
-    
+
     try {
       const paymentType = activeTab === 'receivable' ? 'receivable_payment' : 'payable_payment';
       const response = await fetchWithAuth(`/api/account-payments?customerName=${encodeURIComponent(customerName)}&paymentType=${paymentType}`);
-      
+
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || 'Failed to fetch payment history');
       }
-      
+
       const data = await response.json();
       setPaymentHistory(data.payments || []);
     } catch (err: unknown) {
@@ -256,7 +257,7 @@ export default function AccountsPage() {
 
   const handleUpdatePayment = async (paymentId: string, amount: number, notes: string) => {
     setIsUpdatingPayment(true);
-    
+
     try {
       const response = await fetchWithAuth('/api/account-payments', {
         method: 'PUT',
@@ -267,7 +268,7 @@ export default function AccountsPage() {
           paymentDate: editingDate || undefined,
         }),
       });
-      
+
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || 'Failed to update payment');
@@ -275,7 +276,7 @@ export default function AccountsPage() {
 
       await fetchPaymentHistory(paymentHistoryCustomerName);
       await fetchData();
-      
+
       setEditingPaymentId(null);
       setEditingAmount('');
       setEditingNotes('');
@@ -316,20 +317,20 @@ export default function AccountsPage() {
 
   const handleSaveEditPayment = async () => {
     if (!editingPaymentId) return;
-    
+
     const amount = parseFloat(editingAmount);
     if (isNaN(amount) || amount <= 0) {
       setPaymentHistoryError('Jumlah pembayaran harus berupa angka positif.');
       return;
     }
-    
+
     await handleUpdatePayment(editingPaymentId, amount, editingNotes);
   };
 
   const renderTable = () => {
     if (isLoading) return <p className="text-center py-4">Memuat data...</p>;
     if (error) return <p className="text-center py-4 text-red-500">Error: {error}</p>;
-    if (reportData.length === 0) return <p className="text-center py-4">Tidak ada data ditemukan.</p>;    
+    if (reportData.length === 0) return <p className="text-center py-4">Tidak ada data ditemukan.</p>;
 
     const isReceivable = activeTab === 'receivable';
     const headers = isReceivable
@@ -338,45 +339,45 @@ export default function AccountsPage() {
 
     return (
       <div className="overflow-x-auto mt-6">
-        <table className="min-w-full divide-y divide-gray-200 border border-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[color:var(--border-color)] border border-[color:var(--border-color)]">
+          <thead className="bg-[color:var(--surface)]">
             <tr>
               {headers.map(header => (
-                <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted)] uppercase tracking-wider">
                   {header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[color:var(--card-bg)] divide-y divide-[color:var(--border-color)]">
             {reportData.map((item, index) => {
               const customerOrSupplierName = isReceivable ? (item as IReceivableData).customerName : (item as IPayableData).supplierName;
               return (
                 <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[color:var(--foreground)]">
                     {customerOrSupplierName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).initialReceivableBalance ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).initialPayableBalance ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).totalSales ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).totalPurchases ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).totalPaymentsReceived ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).totalPaymentsMade ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[color:var(--foreground)]">
                     {isReceivable
                       ? ((item as IReceivableData).finalReceivableBalance ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).finalPayableBalance ?? 0).toLocaleString('id-ID')}
-                  </td>                  
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleOpenPaymentHistory(customerOrSupplierName)}
@@ -411,11 +412,11 @@ export default function AccountsPage() {
 
   const renderInitialBalanceForm = () => {
     return (
-      <form onSubmit={handleSetInitialBalance} className="mt-6 p-6 shadow-md rounded-lg bg-white space-y-4">
+      <form onSubmit={handleSetInitialBalance} className="mt-6 p-6 shadow-md rounded-lg bg-[color:var(--card-bg)] space-y-4">
         <h3 className="text-lg font-medium">Atur Saldo Awal {activeTab === 'receivable' ? 'Piutang' : 'Utang'}</h3>
         {error && <p className="text-sm text-red-500">{error}</p>}
         <div className="relative">
-          <label htmlFor="customerSearchBalance" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="customerSearchBalance" className="block text-sm font-medium text-[color:var(--foreground)]">
             Customer/Supplier:
           </label>
           <input
@@ -429,19 +430,19 @@ export default function AccountsPage() {
               }
             }}
             placeholder="Ketik untuk mencari atau masukkan nama baru"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-[color:var(--border-color)] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-[color:var(--background)] text-[color:var(--foreground)]"
           />
-          {isLoadingCustomerSearch && <p className="mt-1 text-xs text-gray-500">Mencari...</p>}
+          {isLoadingCustomerSearch && <p className="mt-1 text-xs text-[color:var(--muted)]">Mencari...</p>}
           {showCustomerSearchResults && customerSearchResults.length > 0 && (
             <ul
-              className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-40 overflow-auto"
+              className="absolute z-10 w-full bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg mt-1 max-h-40 overflow-auto"
               onMouseLeave={() => setTimeout(() => setShowCustomerSearchResults(false), 200)}
             >
               {customerSearchResults.map((name) => (
                 <li
                   key={name}
                   onClick={() => handleSelectCustomerFromSearch(name)}
-                  className="px-3 py-2 hover:bg-indigo-50 cursor-pointer text-sm"
+                  className="px-3 py-2 hover:bg-[color:var(--surface)] cursor-pointer text-sm text-[color:var(--foreground)]"
                 >
                   {name}
                 </li>
@@ -450,7 +451,7 @@ export default function AccountsPage() {
           )}
         </div>
         <div>
-          <label htmlFor="initialBalance" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="initialBalance" className="block text-sm font-medium text-[color:var(--foreground)]">
             Nominal Saldo Awal {activeTab === 'receivable' ? 'Piutang' : 'Utang'}:
           </label>
           <input
@@ -459,7 +460,7 @@ export default function AccountsPage() {
             value={initialBalanceValue}
             onChange={(e) => setInitialBalanceValue(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-[color:var(--border-color)] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-[color:var(--background)] text-[color:var(--foreground)]"
           />
         </div>
         {balanceFormError && <p className="text-sm text-red-500">{balanceFormError}</p>}
@@ -470,8 +471,8 @@ export default function AccountsPage() {
         >
           Simpan Saldo Awal
         </button>
-      </form>    
-      );
+      </form>
+    );
   }
 
   function renderPaymentHistoryModal() {
@@ -479,8 +480,8 @@ export default function AccountsPage() {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
-          onClick={() => setIsPaymentHistoryModalOpen(false)}>
-        <div 
+        onClick={() => setIsPaymentHistoryModalOpen(false)}>
+        <div
           className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
@@ -686,12 +687,12 @@ export default function AccountsPage() {
       } catch (err: unknown) {
         setPaymentFormError(err instanceof Error ? err.message : 'Terjadi kesalahan.');
       }
-    };    
+    };
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
-          onClick={() => setIsPaymentModalOpen(false)}>
-        <div 
+        onClick={() => setIsPaymentModalOpen(false)}>
+        <div
           className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
@@ -859,21 +860,19 @@ export default function AccountsPage() {
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('receivable')}
-            className={`${
-              activeTab === 'receivable'
+            className={`${activeTab === 'receivable'
                 ? 'border-[color:var(--primary)] text-[color:var(--primary)]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >
             Piutang (Receivable)
           </button>
           <button
             onClick={() => setActiveTab('payable')}
-            className={`${
-              activeTab === 'payable'
+            className={`${activeTab === 'payable'
                 ? 'border-[color:var(--primary)] text-[color:var(--primary)]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >
             Utang (Payable)
           </button>
@@ -900,7 +899,7 @@ export default function AccountsPage() {
         >
           Cari
         </button>
-      </div>      
+      </div>
       {renderInitialBalanceForm()}
       {renderTable()}
       {isPaymentModalOpen && renderPaymentModal()}

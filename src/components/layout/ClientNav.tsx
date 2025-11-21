@@ -1,4 +1,4 @@
-  'use client';
+'use client';
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -17,32 +17,32 @@ export default function ClientNav() {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-  };   
+  };
 
   const navLinkClasses = (path: string) =>
-    `py-2 px-4 rounded-lg transition-all duration-200 ease-in-out font-medium
-    ${pathname === path 
-      ? 'text-[color:var(--primary)]'
-      : 'text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[color:var(--surface)]'
+    `py-2 px-4 rounded-lg transition-all duration-300 ease-out font-medium relative group
+    ${pathname === path
+      ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]'
+      : 'text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:bg-[rgba(255,255,255,0.05)]'
     } cursor-pointer`;
 
-  const mobileNavLinkClasses = (path: string) =>      
-    `block py-3 px-4 text-sm transition-all duration-150 ease-in-out font-medium rounded-lg mx-2 my-1
-    ${pathname === path 
-      ? 'text-[color:var(--primary)]' 
-      : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:text-[color:var(--primary)]'
+  const mobileNavLinkClasses = (path: string) =>
+    `block py-3 px-4 text-sm transition-all duration-200 ease-out font-medium rounded-lg mx-2 my-1
+    ${pathname === path
+      ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]'
+      : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'
     }`;
-    
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
   if (!isMounted) {
     return (
-      <nav className="shadow-sm">
+      <nav className="glass shadow-sm border-b border-[color:var(--border-color)]">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link href="/">
-            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer">Stocklet</span>
+            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer tracking-tight">Stocklet</span>
           </Link>
         </div>
       </nav>
@@ -51,32 +51,32 @@ export default function ClientNav() {
 
   if (isLoading) {
     return (
-      <nav className="shadow-sm">
+      <nav className="glass shadow-sm border-b border-[color:var(--border-color)]">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link href="/">
-            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer">Stocklet</span>
+            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer tracking-tight">Stocklet</span>
           </Link>
           <div className="space-x-4">
-            <span className="text-sm" style={{ color: 'var(--foreground)', opacity: 0.7 }}>Loading...</span>
+            <span className="text-sm animate-pulse text-[color:var(--muted)]">Loading...</span>
           </div>
         </div>
       </nav>
     );
-  }    
-    
+  }
+
   return (
-    <nav className="sticky top-0 z-50">
+    <nav className="glass sticky top-0 z-50 border-b border-[color:var(--border-color)]">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/">
-          <span className="text-3xl font-bold text-[color:var(--primary)] cursor-pointer hover:text-[color:var(--primary-hover)] transition-colors duration-200 flex items-center gap-2">
+          <span className="text-3xl font-bold text-[color:var(--primary)] cursor-pointer hover:text-[color:var(--primary-hover)] transition-colors duration-300 flex items-center gap-2 tracking-tight">
             Stocklet
           </span>
-        </Link>    
+        </Link>
 
         <div className="md:hidden">
           <button
             onClick={toggleMobileMenu}
-            className="p-2 rounded-lg text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[color:var(--surface)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-150"
+            className="p-2 rounded-lg text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[rgba(255,255,255,0.05)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
             aria-label="Toggle menu"
             aria-expanded={isMobileMenuOpen}
           >
@@ -88,11 +88,11 @@ export default function ClientNav() {
               )}
             </svg>
           </button>
-        </div>     
+        </div>
 
         <div className="hidden font-semibold md:flex space-x-2 items-center">
           <Link href="/"><span className={navLinkClasses('/')}>Home</span></Link>
-          
+
           {isAuthenticated && (
             <>
               <Link href="/items"><span className={navLinkClasses('/items')}>Stok</span></Link>
@@ -100,29 +100,29 @@ export default function ClientNav() {
               <div className="relative group">
                 <button className={`${navLinkClasses('/reports')} flex items-center gap-1`}>
                   Laporan
-                  <svg className="ml-1 h-4 w-4 transition-transform group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
-                <div className="absolute left-0 mt-2 w-56 rounded-xl shadow-xl bg-[color:var(--card-bg)] ring-1 ring-[color:var(--border-color)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform group-hover:translate-y-1 z-20">
+                <div className="absolute left-0 mt-2 w-64 rounded-xl shadow-2xl glass ring-1 ring-[color:var(--border-color)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform group-hover:translate-y-1 z-20 overflow-hidden">
                   <div className="py-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                     <Link href="/reports/sales">
-                      <span className={`block px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors ${pathname === '/reports/sales' ? 'text-[color:var(--primary)]' : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:text-[color:var(--primary)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/sales' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Penjualan
                       </span>
                     </Link>
                     <Link href="/reports/purchases">
-                      <span className={`block px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors ${pathname === '/reports/purchases' ? 'text-[color:var(--primary)]' : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:text-[color:var(--primary)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/purchases' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Pembelian
                       </span>
                     </Link>
                     <Link href="/reports/items">
-                      <span className={`block px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors ${pathname === '/reports/items' ? 'text-[color:var(--primary)]' : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:text-[color:var(--primary)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/items' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Stok
                       </span>
                     </Link>
                     <Link href="/reports/accounts">
-                      <span className={`block px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors ${pathname === '/reports/accounts' ? 'text-[color:var(--primary)]' : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:text-[color:var(--primary)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/accounts' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Piutang/Utang
                       </span>
                     </Link>
@@ -133,26 +133,26 @@ export default function ClientNav() {
           )}
 
           {isAuthenticated ? (
-          <button
-            onClick={logout}
-            title="Logout" 
-            className="p-2 rounded-full text-red-500 opacity-75 hover:opacity-100 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition-all duration-200 ease-in-out"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+            <button
+              onClick={logout}
+              title="Logout"
+              className="p-2 rounded-full text-red-400 opacity-75 hover:opacity-100 hover:bg-[rgba(239,68,68,0.1)] focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ease-in-out ml-2"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </button>
           ) : (
             pathname !== '/login' && (
               <Link href="/login"><span className={navLinkClasses('/login')}>Login</span></Link>
@@ -164,13 +164,12 @@ export default function ClientNav() {
         </div>
       </div>
 
-      <div 
-        className={`md:hidden absolute top-full left-0 right-0 shadow-xl border-t transition-all duration-300 ease-in-out transform ${isMobileMenuOpen ? 'translate-y-0 opacity-100 visible' : '-translate-y-4 opacity-0 invisible'}`}
-        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
+      <div
+        className={`md:hidden absolute top-full left-0 right-0 glass border-t border-[color:var(--border-color)] transition-all duration-300 ease-in-out transform origin-top ${isMobileMenuOpen ? 'scale-y-100 opacity-100 visible' : 'scale-y-0 opacity-0 invisible'}`}
       >
         <div className="pt-2 pb-3 space-y-1">
           <Link href="/"><span className={mobileNavLinkClasses('/')} onClick={toggleMobileMenu}>Home</span></Link>
-          
+
           {isAuthenticated && (
             <>
               <Link href="/items"><span className={mobileNavLinkClasses('/items')} onClick={toggleMobileMenu}>Stok</span></Link>
@@ -184,7 +183,7 @@ export default function ClientNav() {
           {isAuthenticated ? (
             <button
               onClick={() => { logout(); toggleMobileMenu(); }}
-              className={`w-full text-left text-red-500 ${mobileNavLinkClasses('/logout-button-placeholder-mobile')}`}
+              className={`w-full text-left text-red-400 ${mobileNavLinkClasses('/logout-button-placeholder-mobile')}`}
             >
               Logout
             </button>
