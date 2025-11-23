@@ -84,34 +84,46 @@ const updateTransactionHandler = async (
     const originalItemId = oldTransaction.item as mongoose.Types.ObjectId;
     const originalItemDoc = await Item.findById(originalItemId);
 
-    const targetItemDoc = await Item.findById(itemId);
+    const normalizedItemId = typeof itemId === 'string' ? new mongoose.Types.ObjectId(itemId) : itemId;
+    const targetItemDoc = await Item.findById(normalizedItemId);
     if (!targetItemDoc) {
       return { status: 404, error: 'Item not found for transaction update.' };
     }
     const currentTargetItem = targetItemDoc as IItem;
+    const isSameItem = originalItemDoc && originalItemDoc._id.equals(currentTargetItem._id);
+    const revertDelta = oldTransaction.tipe === TransactionType.PENJUALAN ? oldTransaction.berat : -oldTransaction.berat;
+    const applyDelta = tipe === TransactionType.PENJUALAN ? -berat : berat;
 
     if (tipe === TransactionType.PENJUALAN) {
-      let availableStock = currentTargetItem.stokSaatIni;
-      if (originalItemDoc && originalItemDoc._id.equals(currentTargetItem._id)) {
-        if (oldTransaction.tipe === TransactionType.PENJUALAN) {
-          availableStock += oldTransaction.berat;
-        } else if (oldTransaction.tipe === TransactionType.PEMBELIAN) {
-          availableStock -= oldTransaction.berat;
-        }
-      }
-
+      const availableStock = currentTargetItem.stokSaatIni + (isSameItem ? revertDelta : 0);
       if (availableStock < berat) {
         return { status: 400, error: `Stok tidak mencukupi untuk ${currentTargetItem.namaBarang}.` };
       }
     }
 
-    if (originalItemDoc) {
-      if (oldTransaction.tipe === TransactionType.PENJUALAN) {
-        originalItemDoc.stokSaatIni += oldTransaction.berat;
-      } else if (oldTransaction.tipe === TransactionType.PEMBELIAN) {
-        originalItemDoc.stokSaatIni -= oldTransaction.berat;
+    if (isSameItem && originalItemDoc) {
+      const finalStock = originalItemDoc.stokSaatIni + revertDelta + applyDelta;
+      if (finalStock < 0) {
+        return { status: 400, error: `Stok tidak mencukupi untuk ${currentTargetItem.namaBarang}.` };
       }
+      originalItemDoc.stokSaatIni = finalStock;
       await originalItemDoc.save();
+    } else {
+      if (originalItemDoc) {
+        const originalFinalStock = originalItemDoc.stokSaatIni + revertDelta;
+        if (originalFinalStock < 0) {
+          return { status: 400, error: `Stok ${originalItemDoc.namaBarang} tidak mencukupi setelah perubahan transaksi.` };
+        }
+        originalItemDoc.stokSaatIni = originalFinalStock;
+        await originalItemDoc.save();
+      }
+
+      const targetFinalStock = currentTargetItem.stokSaatIni + applyDelta;
+      if (targetFinalStock < 0) {
+        return { status: 400, error: `Stok tidak mencukupi untuk ${currentTargetItem.namaBarang}.` };
+      }
+      currentTargetItem.stokSaatIni = targetFinalStock;
+      await currentTargetItem.save();
     }
     
     oldTransaction.tanggal = typeof tanggal === 'string' ? new Date(tanggal) : tanggal;
@@ -120,12 +132,16 @@ const updateTransactionHandler = async (
     oldTransaction.noSJ = noSJ;
     oldTransaction.noInv = noInv;
     oldTransaction.noPO = noPO;
-    oldTransaction.item = typeof itemId === 'string' ? new mongoose.Types.ObjectId(itemId) : itemId;
+    oldTransaction.item = normalizedItemId;
     oldTransaction.namaBarangSnapshot = currentTargetItem.namaBarang;
     oldTransaction.berat = berat;
     oldTransaction.harga = harga;
     oldTransaction.totalHarga = berat * harga;
     oldTransaction.noSJSby = noSJSby;
+
+    const locals = (oldTransaction.$locals as { skipStockAdjustment?: boolean } | undefined) ?? {};
+    locals.skipStockAdjustment = true;
+    oldTransaction.$locals = locals as typeof oldTransaction.$locals;
 
     const updatedTransaction = await oldTransaction.save();
 
@@ -134,9 +150,11 @@ const updateTransactionHandler = async (
   } catch (error: unknown) {
     console.error(`Update transaction ${transactionId} error:`, error);
     if (error instanceof mongoose.Error.ValidationError) {
-      return { status: 400, error: error.message };
+      const validationError = error as mongoose.Error.ValidationError;
+      return { status: 400, error: validationError.message };
     }
-    return { status: 500, error: 'An internal server error occurred.' };
+    const fallbackMessage = error instanceof Error ? error.message : 'An internal server error occurred.';
+    return { status: 500, error: fallbackMessage };
   }
 };
 
