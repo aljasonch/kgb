@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { IItem } from '@/models/Item';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { fetchWithAuth } from '@/lib/fetchWithAuth';
 import debounce from 'lodash.debounce';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ interface ItemsListProps {
 }
 
 export default function ItemsList({ initialItems: initialItemsProp, refreshKey }: ItemsListProps) {
-  const [items, setItems] = useState<IItem[]>(initialItemsProp || []);
+  const [allItems, setAllItems] = useState<IItem[]>(initialItemsProp || []);
   const [isLoading, setIsLoading] = useState(!initialItemsProp);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,6 +22,8 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 6;
+  const fetchLimit = 9999;
+  const requestIdRef = useRef(0);
 
   const [adjustingItemId, setAdjustingItemId] = useState<string | null>(null);
   const [currentItemForModal, setCurrentItemForModal] = useState<IItem | null>(null);
@@ -37,59 +39,111 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
   const [editNameError, setEditNameError] = useState<string | null>(null);
 
   const fetchItems = useCallback(
-    async (pageToFetch: number, search: string) => {
+    async (search: string) => {
+      const requestId = ++requestIdRef.current;
       setIsLoading(true);
       setError(null);
       try {
-        const queryParams = new URLSearchParams({
-          page: pageToFetch.toString(),
-          limit: itemsPerPage.toString(),
-          search: search,
+        const baseParams = new URLSearchParams({
+          page: '1',
+          limit: fetchLimit.toString(),
+          search,
         });
-        const response = await fetchWithAuth(`/api/items?${queryParams.toString()}`);
+        const response = await fetchWithAuth(`/api/items?${baseParams.toString()}`);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Failed to fetch items');
         }
         const data = await response.json();
-        setItems(data.items || []);
-        setCurrentPage(data.currentPage);
-        setTotalPages(data.totalPages);
-        setTotalItems(data.totalItems);
+        const firstPageItems: IItem[] = data.items || [];
+        const totalPagesFromApi = Number(data.totalPages) || 1;
+        let aggregatedItems = firstPageItems;
+
+        if (totalPagesFromApi > 1) {
+          const pagesToFetch = Array.from({ length: totalPagesFromApi - 1 }, (_, idx) => idx + 2);
+          const remainingPages = await Promise.all(
+            pagesToFetch.map(async (page) => {
+              const pageParams = new URLSearchParams({
+                page: page.toString(),
+                limit: fetchLimit.toString(),
+                search,
+              });
+              const pageResp = await fetchWithAuth(`/api/items?${pageParams.toString()}`);
+              if (!pageResp.ok) {
+                const errorData = await pageResp.json();
+                throw new Error(errorData.message || 'Failed to fetch items');
+              }
+              const pageData = await pageResp.json();
+              const pageItems = (pageData.items as IItem[]) || [];
+              return pageItems;
+            })
+          );
+          aggregatedItems = remainingPages.reduce((acc, curr) => acc.concat(curr), aggregatedItems);
+        }
+
+        if (requestId === requestIdRef.current) {
+          setAllItems(aggregatedItems);
+          setCurrentPage(1);
+        }
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
-        setItems([]);
+        if (requestId === requestIdRef.current) {
+          setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+          setAllItems([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (requestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     },
-    [itemsPerPage]
+    [fetchLimit]
   );
 
   const debouncedFetchItems = useMemo(
     () =>
-      debounce((page: number, search: string) => {
-        fetchItems(page, search);
+      debounce((search: string) => {
+        fetchItems(search);
       }, 500),
     [fetchItems]
   );
 
   useEffect(() => {
-    if (initialItemsProp && initialItemsProp.length > 0 && currentPage === 1 && (refreshKey === undefined || refreshKey === 0) && !searchTerm) {
+    if (initialItemsProp && initialItemsProp.length > 0) {
+      setAllItems(initialItemsProp);
       setIsLoading(false);
-    } else {
-      debouncedFetchItems(currentPage, searchTerm);
     }
+  }, [initialItemsProp]);
+
+  useEffect(() => {
+    debouncedFetchItems(searchTerm);
     return () => {
       debouncedFetchItems.cancel();
     };
-  }, [currentPage, refreshKey, searchTerm, debouncedFetchItems, initialItemsProp]);
+  }, [searchTerm, refreshKey, debouncedFetchItems]);
+
+  useEffect(() => {
+    const total = allItems.length;
+    const pages = total === 0 ? 0 : Math.ceil(total / itemsPerPage);
+    setTotalItems(total);
+    setTotalPages(pages);
+    if (pages > 0 && currentPage > pages) {
+      setCurrentPage(pages);
+    }
+    if (pages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [allItems, itemsPerPage, currentPage]);
 
   useEffect(() => {
     if (refreshKey && refreshKey > 0) {
       setCurrentPage(1);
     }
   }, [refreshKey]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return allItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [allItems, currentPage, itemsPerPage]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -98,7 +152,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
 
   const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75";
   const themedTextError = "text-center text-red-600";
-  const showEmptyState = !isLoading && !error && items.length === 0;
+  const showEmptyState = !isLoading && !error && allItems.length === 0;
 
   return (
     <>
@@ -157,11 +211,11 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
 
       {!error && !showEmptyState && (
         <div
-          className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${isLoading && items.length === 0 ? "opacity-0" : "opacity-100"
+          className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${isLoading && allItems.length === 0 ? "opacity-0" : "opacity-100"
             }`}
         >
           <ul role="list" className="divide-y divide-[color:var(--border-color)]">
-            {items.map((item) => (
+            {paginatedItems.map((item) => (
               <li
                 key={item._id.toString()}
                 className="px-4 py-5 sm:px-6  transition-colors duration-150 ease-in-out"
@@ -234,7 +288,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                                 data.message || "Gagal menghapus barang."
                               );
                             }
-                            setItems((prev) =>
+                            setAllItems((prev) =>
                               prev.filter((i) => i._id !== item._id)
                             );
                             alert("Barang berhasil dihapus.");
@@ -396,10 +450,10 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       <div className="text-center">
                         <div className="text-lg mb-1">
                           {type === "add"
-                            ? "➕"
+                            ? "+"
                             : type === "subtract"
-                              ? "➖"
-                              : "🎯"}
+                              ? "-"
+                              : "="}
                         </div>
                         <span className="text-sm font-medium">
                           {type === "add"
@@ -516,7 +570,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         );
                       }
                       const updatedItemData = await response.json();
-                      setItems((prev) =>
+                      setAllItems((prev) =>
                         prev.map((i) =>
                           i._id.toString() === adjustingItemId ? updatedItemData.item : i
                         )
@@ -707,7 +761,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         );
                       }
                       const updatedItemData = await response.json();
-                      setItems((prev) =>
+                      setAllItems((prev) =>
                         prev.map((i) =>
                           i._id.toString() === editingItemId
                             ? { ...i, ...updatedItemData.item }
@@ -763,3 +817,4 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
     </>
   );
 }
+
