@@ -1,10 +1,11 @@
 'use client';
 
 import { IItem } from '@/models/Item';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/fetchWithAuth';
-import Link from 'next/link'; 
-import { FaEdit, FaRegTrashAlt } from 'react-icons/fa';
+import debounce from 'lodash.debounce';
+import Link from 'next/link';
+import { FaEdit, FaRegTrashAlt, FaSearch } from 'react-icons/fa';
 import { LuSettings2 } from 'react-icons/lu'
 
 interface ItemsListProps {
@@ -19,6 +20,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 6;
 
   const [adjustingItemId, setAdjustingItemId] = useState<string | null>(null);
@@ -34,11 +36,16 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
   const [newItemName, setNewItemName] = useState("");
   const [editNameError, setEditNameError] = useState<string | null>(null);
 
-  const fetchItems = async (pageToFetch: number) => {
+  const fetchItems = async (pageToFetch: number, search: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth(`/api/items?page=${pageToFetch}&limit=${itemsPerPage}`);
+      const queryParams = new URLSearchParams({
+        page: pageToFetch.toString(),
+        limit: itemsPerPage.toString(),
+        search: search,
+      });
+      const response = await fetchWithAuth(`/api/items?${queryParams.toString()}`);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch items');
@@ -56,20 +63,35 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchItems = useCallback(
+    debounce((page: number, search: string) => {
+      fetchItems(page, search);
+    }, 500),
+    []
+  );
+
   useEffect(() => {
-    if (initialItemsProp && initialItemsProp.length > 0 && currentPage === 1 && (refreshKey === undefined || refreshKey === 0)) {
+    if (initialItemsProp && initialItemsProp.length > 0 && currentPage === 1 && (refreshKey === undefined || refreshKey === 0) && !searchTerm) {
       setIsLoading(false);
     } else {
-      fetchItems(currentPage);
+      debouncedFetchItems(currentPage, searchTerm);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, refreshKey]);
+    return () => {
+      debouncedFetchItems.cancel();
+    };
+  }, [currentPage, refreshKey, searchTerm, debouncedFetchItems]);
 
   useEffect(() => {
     if (refreshKey && refreshKey > 0) {
       setCurrentPage(1);
     }
   }, [refreshKey]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
+  };
 
   const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75";
   const themedTextError = "text-center text-red-600";
@@ -85,7 +107,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
 
   if (error) {
     return <div className="p-4 my-4 bg-opacity-10 rounded-md">
-        <p className={themedTextError}>Error: {error}</p>
+      <p className={themedTextError}>Error: {error}</p>
     </div>;
   }
 
@@ -122,10 +144,22 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
 
   return (
     <>
+      <div className="mb-6 relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <FaSearch className="text-gray-400" />
+        </div>
+        <input
+          type="text"
+          placeholder="Cari nama barang..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="pl-10 pr-4 py-2 w-full border border-[color:var(--border-color)] rounded-lg bg-[color:var(--card-bg)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
+        />
+      </div>
+
       <div
-        className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${
-          isLoading && items.length === 0 ? "opacity-0" : "opacity-100"
-        }`}
+        className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${isLoading && items.length === 0 ? "opacity-0" : "opacity-100"
+          }`}
       >
         <ul role="list" className="divide-y divide-[color:var(--border-color)]">
           {items.map((item) => (
@@ -139,20 +173,20 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                 </p>
                 <div className="ml-2 flex-shrink-0 flex">
                   <p className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
+                    Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
                   </p>
                 </div>
               </div>
               <div className="mt-2.5 sm:flex sm:justify-between">
                 <div className="sm:flex">
                   <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75">
-                  Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
+                    Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
                   </p>
                   <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:ml-4">
-                  Masuk: {item.totalMasuk?.toFixed(0) ?? '0'}
+                    Masuk: {item.totalMasuk?.toFixed(0) ?? '0'}
                   </p>
                   <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:ml-4">
-                  Keluar: {item.totalKeluar?.toFixed(0) ?? '0'}
+                    Keluar: {item.totalKeluar?.toFixed(0) ?? '0'}
                   </p>
                 </div>
                 <div className="mt-2 flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:mt-0 sm:ml-4">
@@ -171,7 +205,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       Detail
                     </span>
                   </Link>
-                  <button         
+                  <button
                     onClick={() => {
                       setEditingItemId(item._id.toString());
                       setEditingItemName(item.namaBarang);
@@ -207,10 +241,9 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                           alert("Barang berhasil dihapus.");
                         } catch (err: unknown) {
                           alert(
-                            `Error: ${
-                              err instanceof Error
-                                ? err.message
-                                : "An unknown error occurred."
+                            `Error: ${err instanceof Error
+                              ? err.message
+                              : "An unknown error occurred."
                             }`
                           );
                         }
@@ -242,7 +275,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
 
       {isStockModalOpen && currentItemForModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
-            onClick={() => setIsStockModalOpen(false)}>
+          onClick={() => setIsStockModalOpen(false)}>
           <div
             className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
             onClick={(e) => e.stopPropagation()}
@@ -343,11 +376,10 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       key={type}
                       className={`
                       relative flex items-center justify-center p-4 cursor-pointer rounded-xl border-2 transition-all
-                      ${
-                        adjustmentType === type
+                      ${adjustmentType === type
                           ? "border-[color:var(--primary)] bg-[color:var(--primary)] bg-opacity-10 text-white"
                           : "border-[color:var(--border-color)] hover:border-[color:var(--primary)] hover:bg-[color:var(--surface)]"
-                      }
+                        }
                     `}
                     >
                       <input
@@ -366,15 +398,15 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                           {type === "add"
                             ? "➕"
                             : type === "subtract"
-                            ? "➖"
-                            : "🎯"}
+                              ? "➖"
+                              : "🎯"}
                         </div>
                         <span className="text-sm font-medium">
                           {type === "add"
                             ? "Tambah"
                             : type === "subtract"
-                            ? "Kurang"
-                            : "Atur"}
+                              ? "Kurang"
+                              : "Atur"}
                         </span>
                       </div>
                       {adjustmentType === type && (
@@ -396,7 +428,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                   ))}
                 </div>
               </div>
-              
+
               <div>
                 <label
                   htmlFor="adjustmentValue"
@@ -405,8 +437,8 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                   {adjustmentType === "set"
                     ? "Atur ke Jumlah"
                     : adjustmentType === "add"
-                    ? "Jumlah yang Ditambah"
-                    : "Jumlah yang Dikurang"}
+                      ? "Jumlah yang Ditambah"
+                      : "Jumlah yang Dikurang"}
                 </label>
                 <div className="relative">
                   <input
@@ -513,7 +545,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
       )}
       {isEditNameModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
-            onClick={() => setIsEditNameModalOpen(false)}>
+          onClick={() => setIsEditNameModalOpen(false)}>
           <div
             className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-md mx-4 overflow-hidden animate-slideUp"
             onClick={(e) => e.stopPropagation()}
