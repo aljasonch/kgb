@@ -117,17 +117,17 @@ export default function RegisterForm() {
       </div>
 
       {error && (
-          <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600">{error}</p>
       )}
       {successMessage && (
-          <p className="text-sm text-green-500">{successMessage}</p>
+        <p className="text-sm text-green-500">{successMessage}</p>
       )}
 
       <div>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full cursor-pointer flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
+          className="w-full btn-primary justify-center disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
