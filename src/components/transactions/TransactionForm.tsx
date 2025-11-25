@@ -30,7 +30,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
   const [harga, setHarga] = useState(initialData?.harga?.toString() || '');
   const [noSJSby, setNoSJSby] = useState(initialData?.noSJSby || '');
 
-  const [isLoadingItems, setIsLoadingItems] = useState(true); 
+  const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +90,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
   const handleSelectItem = (item: IItem) => {
     setItemId(item._id.toString());
     setSelectedItemName(item.namaBarang);
-    setItemSearchTerm(item.namaBarang); 
+    setItemSearchTerm(item.namaBarang);
     setItemSearchResults([]);
     setShowItemSearchResults(false);
   };
@@ -102,7 +102,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
         if (currentItemId) {
           if ((initialData.item as IItem)?.namaBarang) {
             setSelectedItemName((initialData.item as IItem).namaBarang);
-            setItemSearchTerm((initialData.item as IItem).namaBarang); 
+            setItemSearchTerm((initialData.item as IItem).namaBarang);
             setItemId(currentItemId);
             setIsLoadingItems(false);
           } else {
@@ -124,7 +124,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
             }
           }
         } else {
-           setIsLoadingItems(false);
+          setIsLoadingItems(false);
         }
       } else {
         setIsLoadingItems(false);
@@ -159,9 +159,9 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
     const hargaNum = parseFloat(harga);
 
     if (!itemId) {
-        setError('Please select an item.');
-        setIsSubmitting(false);
-        return;
+      setError('Please select an item.');
+      setIsSubmitting(false);
+      return;
     }
     if (isNaN(beratNum) || beratNum <= 0) {
       setError('Berat must be a positive number.');
@@ -173,7 +173,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
       setIsSubmitting(false);
       return;
     }
-    
+
     const transactionData = {
       tanggal, tipe, customer, noSJ, noInv, noPO, itemId,
       berat: beratNum, harga: hargaNum, noSJSby,
@@ -212,10 +212,10 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
   const inputStyles = "appearance-none block w-full px-3 py-2.5 rounded-md shadow-sm placeholder-[color:var(--foreground)] placeholder-opacity-50  sm:text-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)] transition-all duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed";
   const labelStyles = "block text-sm font-medium text-[color:var(--foreground)] opacity-90";
 
-  return (  
+  return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-[color:var(--card-bg)] p-6 sm:p-8 rounded-lg shadow-lg border border-[color:var(--border-color)]">
       <h3 className="text-xl font-semibold leading-7 text-[color:var(--foreground)] mb-6">{isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi Baru'}</h3>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
         <div>
           <label htmlFor="tanggal" className={labelStyles}>Tanggal</label>
@@ -234,7 +234,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
           <label htmlFor="customer" className={labelStyles}>{tipe === TransactionType.PENJUALAN ? 'Customer' : 'Supplier'}</label>
           <input type="text" id="customer" value={customer} onChange={(e) => setCustomer(e.target.value)} required className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
         </div>
-        
+
         <div>
           <label htmlFor="noSJ" className={labelStyles}>No. Surat Jalan (SJ)</label>
           <input type="text" id="noSJ" value={noSJ} onChange={(e) => setNoSJ(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
@@ -249,7 +249,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
           <label htmlFor="noPO" className={labelStyles}>No. PO (Opsional)</label>
           <input type="text" id="noPO" value={noPO} onChange={(e) => setNoPO(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
         </div>
-        
+
         <div>
           <label htmlFor="noSJSby" className={labelStyles}>No. SJ SBY (Opsional)</label>
           <input type="text" id="noSJSby" value={noSJSby} onChange={(e) => setNoSJSby(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
@@ -262,14 +262,14 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
             id="itemSearch"
             value={itemSearchTerm}
             onChange={handleItemSearchChange}
-            onFocus={() => { if (itemSearchTerm && itemSearchResults.length > 0) setShowItemSearchResults(true);}}
+            onFocus={() => { if (itemSearchTerm && itemSearchResults.length > 0) setShowItemSearchResults(true); }}
             placeholder={isLoadingItems ? "Loading item..." : "Ketik untuk mencari barang..."}
             className={`mt-1 ${inputStyles} placeholder-gray-400`}
             disabled={isSubmitting || isLoadingItems}
-            required={!itemId} 
+            required={!itemId}
           />
           {isLoadingItemSearch && <p className="mt-1 text-xs text-[color:var(--foreground)] opacity-75">Mencari...</p>}
-          
+
           {showItemSearchResults && itemSearchResults.length > 0 && (
             <ul className="absolute z-10 w-full bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
               {itemSearchResults.map((item) => (
@@ -283,7 +283,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
               ))}
             </ul>
           )}
-           {itemId && selectedItemName && !showItemSearchResults && (
+          {itemId && selectedItemName && !showItemSearchResults && (
             <p className="mt-1 text-sm text-green-600">Terpilih: {selectedItemName}</p>
           )}
         </div>
@@ -300,14 +300,14 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
       </div>
 
       {error && (
-          <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600">{error}</p>
       )}
       {successMessage && (
-          <p className="text-sm text-green-500">{successMessage}</p>
+        <p className="text-sm text-green-500">{successMessage}</p>
       )}
 
       <div className="pt-4">
-        <button type="submit" disabled={isSubmitting || isLoadingItems} className="w-full cursor-pointer flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-150 ease-in-out">
+        <button type="submit" disabled={isSubmitting || isLoadingItems} className="w-full btn-primary justify-center disabled:opacity-60 disabled:cursor-not-allowed">
           {isSubmitting ? (
             <>
               <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
