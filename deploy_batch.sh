@@ -15,9 +15,6 @@ EOF
 echo "Created .vercel/project.json:"
 cat .vercel/project.json
 
-echo "Running fix-react2shell-next..."
-npx --yes fix-react2shell-next
-
 npm install -g vercel@latest
 
 echo "Using Vercel project: $PROJECT_ID"
