@@ -28,6 +28,7 @@ interface PurchaseMatchQuery {
   tanggal?: { $gte: Date; $lte: Date };
   customer?: { $regex: RegExp };
   item?: mongoose.Types.ObjectId;
+  $and?: Array<Record<string, unknown>>;
 }
 
 interface PurchaseTxLean {
@@ -78,6 +79,7 @@ const getExportPurchasesHandler = async (request: NextRequest): Promise<Response
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const view = searchParams.get('view');
+    const noSjType = searchParams.get('noSjType') as 'all' | 'noSJ' | 'noSJSby' | null;
 
     const matchQuery: PurchaseMatchQuery = {
       createdBy: new mongoose.Types.ObjectId(userId),
@@ -104,6 +106,29 @@ const getExportPurchasesHandler = async (request: NextRequest): Promise<Response
     }
     if (itemId && mongoose.Types.ObjectId.isValid(itemId)) {
       matchQuery.item = new mongoose.Types.ObjectId(itemId);
+    }
+
+    if (noSjType && noSjType !== 'all') {
+      matchQuery.$and = matchQuery.$and || [];
+      if (noSjType === 'noSJ') {
+        matchQuery.$and.push({
+          noSJ: { $exists: true, $nin: [null, ""] }
+        });
+        matchQuery.$and.push({
+          $or: [
+            { noSJSby: { $exists: false } },
+            { noSJSby: null },
+            { noSJSby: "" }
+          ]
+        });
+      } else if (noSjType === 'noSJSby') {
+        matchQuery.$and.push({
+          noSJSby: { $exists: true, $nin: [null, ""] }
+        });
+      }
+    }
+    if (matchQuery.$and && matchQuery.$and.length === 0) {
+      delete matchQuery.$and;
     }
 
     const purchaseData = await Transaction.find(matchQuery)
