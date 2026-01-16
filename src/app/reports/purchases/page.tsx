@@ -15,6 +15,7 @@ interface FilterState {
   itemId?: string;
   startDate?: string;
   endDate?: string;
+  noSjType?: 'all' | 'noSJ' | 'noSJSby';
 }
 
 interface IncomingFiltersFromSalesReport {
@@ -25,6 +26,7 @@ interface IncomingFiltersFromSalesReport {
   itemId?: string;
   startDate?: string;
   endDate?: string;
+  noSjType?: 'all' | 'noSJ' | 'noSJSby';
 }
 
 export default function PurchaseReportPage() {
@@ -69,6 +71,7 @@ export default function PurchaseReportPage() {
     if (currentFilters.itemId) queryParams.append('itemId', currentFilters.itemId);
     if (currentFilters.startDate) queryParams.append('startDate', currentFilters.startDate);
     if (currentFilters.endDate) queryParams.append('endDate', currentFilters.endDate);
+    if (currentFilters.noSjType) queryParams.append('noSjType', currentFilters.noSjType);
 
     try {
       const response = await fetchWithAuth(`/api/reports/purchases?${queryParams.toString()}`);
@@ -99,6 +102,7 @@ export default function PurchaseReportPage() {
       itemId: newFiltersFromComponent.itemId,
       startDate: newFiltersFromComponent.startDate,
       endDate: newFiltersFromComponent.endDate,
+      noSjType: newFiltersFromComponent.noSjType,
     };
     if (newFiltersFromComponent.customer) {
         mappedFilters.supplier = newFiltersFromComponent.customer;
@@ -115,6 +119,7 @@ export default function PurchaseReportPage() {
     if (filters.itemId) queryParams.append('itemId', filters.itemId);
     if (filters.startDate) queryParams.append('startDate', filters.startDate);
     if (filters.endDate) queryParams.append('endDate', filters.endDate);
+    if (filters.noSjType) queryParams.append('noSjType', filters.noSjType);
     window.location.href = `/api/export/purchases?${queryParams.toString()}`;
   };
 
