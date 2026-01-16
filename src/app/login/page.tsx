@@ -10,7 +10,7 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-md space-y-8 glass p-8 rounded-2xl shadow-2xl">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--secondary)] tracking-tight">
+          <h1 className="text-4xl font-extrabold text-[color:var(--primary)] tracking-tight">
             Stocklet
           </h1>
           <h2 className="mt-6 text-2xl font-semibold text-[color:var(--foreground)]">

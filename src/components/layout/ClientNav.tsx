@@ -22,15 +22,15 @@ export default function ClientNav() {
   const navLinkClasses = (path: string) =>
     `py-2 px-4 rounded-lg transition-all duration-300 ease-out font-medium relative group
     ${pathname === path
-      ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]'
-      : 'text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:bg-[rgba(255,255,255,0.05)]'
+      ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]'
+      : 'text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-highlight)]'
     } cursor-pointer`;
 
   const mobileNavLinkClasses = (path: string) =>
     `block py-3 px-4 text-sm transition-all duration-200 ease-out font-medium rounded-lg mx-2 my-1
     ${pathname === path
-      ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]'
-      : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'
+      ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]'
+      : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'
     }`;
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function ClientNav() {
         <div className="md:hidden">
           <button
             onClick={toggleMobileMenu}
-            className="p-2 rounded-lg text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[rgba(255,255,255,0.05)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
+            className="p-2 rounded-lg text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[color:var(--surface-highlight)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
             aria-label="Toggle menu"
             aria-expanded={isMobileMenuOpen}
           >
@@ -107,22 +107,22 @@ export default function ClientNav() {
                 <div className="absolute left-0 mt-2 w-64 rounded-xl shadow-2xl glass ring-1 ring-[color:var(--border-color)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform group-hover:translate-y-1 z-20 overflow-hidden">
                   <div className="py-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                     <Link href="/reports/sales">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/sales' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/sales' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Penjualan
                       </span>
                     </Link>
                     <Link href="/reports/purchases">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/purchases' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/purchases' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Pembelian
                       </span>
                     </Link>
                     <Link href="/reports/items">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/items' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/items' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Laporan Stok
                       </span>
                     </Link>
                     <Link href="/reports/accounts">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/accounts' ? 'text-[color:var(--primary)] bg-[rgba(99,102,241,0.1)]' : 'text-[color:var(--muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
+                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/accounts' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
                         Piutang/Utang
                       </span>
                     </Link>
@@ -136,7 +136,7 @@ export default function ClientNav() {
             <button
               onClick={logout}
               title="Logout"
-              className="p-2 rounded-full text-red-400 opacity-75 hover:opacity-100 hover:bg-[rgba(239,68,68,0.1)] focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ease-in-out ml-2"
+              className="p-2 rounded-full text-[color:var(--danger)] opacity-75 hover:opacity-100 hover:bg-[color:var(--danger-soft)] focus:outline-none focus:ring-2 focus:ring-[color:var(--danger)] transition-all duration-200 ease-in-out ml-2"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +183,7 @@ export default function ClientNav() {
           {isAuthenticated ? (
             <button
               onClick={() => { logout(); toggleMobileMenu(); }}
-              className={`w-full text-left text-red-400 ${mobileNavLinkClasses('/logout-button-placeholder-mobile')}`}
+              className={`w-full text-left text-[color:var(--danger)] ${mobileNavLinkClasses('/logout-button-placeholder-mobile')}`}
             >
               Logout
             </button>
