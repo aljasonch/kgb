@@ -18,7 +18,7 @@ export default function ItemTransactionDetailsPage() {
 
   useEffect(() => {
     if (!itemId) {
-      setError('Item ID not found.');
+      setError('ID barang tidak ditemukan.');
       setIsLoading(false);
       return;
     }
@@ -31,7 +31,7 @@ export default function ItemTransactionDetailsPage() {
         const itemResponse = await fetchWithAuth(`/api/items/${itemId}`);
         if (!itemResponse.ok) {
           const itemErrorData = await itemResponse.json();
-          throw new Error(itemErrorData.message || 'Failed to fetch item details');
+          throw new Error(itemErrorData.message || 'Gagal memuat detail barang.');
         }
         const itemData = await itemResponse.json();
         setItem(itemData.item);
@@ -40,13 +40,13 @@ export default function ItemTransactionDetailsPage() {
         const transactionsResponse = await fetchWithAuth(`/api/items/${itemId}/transactions`);
         if (!transactionsResponse.ok) {
           const transErrorData = await transactionsResponse.json();
-          throw new Error(transErrorData.message || 'Failed to fetch item transactions');
+          throw new Error(transErrorData.message || 'Gagal memuat transaksi barang.');
         }
         const transactionsData = await transactionsResponse.json();
         setTransactions(transactionsData.transactions || []);
 
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+        setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak terduga.');
         setItem(null);
         setTransactions([]);
       } finally {
@@ -57,8 +57,8 @@ export default function ItemTransactionDetailsPage() {
     fetchData();
   }, [itemId]);
 
-  const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75 py-4";
-  const themedTextError = "text-center text-red-600";
+  const themedTextMuted = "text-center py-4 text-sm text-[color:var(--muted)]";
+  const themedTextError = "text-center text-sm text-[color:var(--danger)]";
   const thClasses = "px-6 py-3 text-left text-xs font-medium text-[color:var(--foreground)] opacity-75 uppercase tracking-wider";
   const tdBaseClasses = "px-6 py-4 whitespace-nowrap text-sm";
   const tdTextMuted = `${tdBaseClasses} text-[color:var(--foreground)] opacity-75`;
@@ -68,15 +68,15 @@ export default function ItemTransactionDetailsPage() {
     return (
       <div className="flex items-center justify-center space-x-3 py-6">
         <div className="w-5 h-5 border-2 border-t-[color:var(--primary)] border-gray-200 rounded-full animate-spin"></div>
-        <p className={themedTextMuted}>Loading item details...</p>
+        <p className={themedTextMuted}>Memuat detail barang…</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="p-4 my-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+      <div className="page-shell">
+        <div className="status-message status-danger">
           <p className={themedTextError}>Error: {error}</p>
         </div>
         <Link href="/items" className="text-[color:var(--primary)] hover:underline">
@@ -89,7 +89,7 @@ export default function ItemTransactionDetailsPage() {
   if (!item) {
     return (
       <div className="container mx-auto p-4">
-        <p className={themedTextMuted}>Item not found.</p>
+        <p className={themedTextMuted}>Barang tidak ditemukan.</p>
         <Link href="/items" className="text-[color:var(--primary)] hover:underline">
           Kembali ke Daftar Barang
         </Link>
@@ -98,12 +98,13 @@ export default function ItemTransactionDetailsPage() {
   }
   
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 text-[color:var(--foreground)]">
-        Rincian Transaksi untuk: {item.namaBarang}
-      </h1>
+    <div className="page-shell">
+      <header className="page-header">
+        <p className="eyebrow">Detail barang</p>
+        <h1 className="page-title text-3xl">Rincian transaksi untuk {item.namaBarang}</h1>
+      </header>
 
-      <div className="mb-6">
+      <div>
         <Link href="/items" className="text-[color:var(--primary)] hover:underline font-medium">
           &larr; Kembali ke Daftar Barang
         </Link>
@@ -112,14 +113,14 @@ export default function ItemTransactionDetailsPage() {
       {transactions.length === 0 ? (
         <p className={themedTextMuted}>Tidak ada transaksi ditemukan untuk barang ini.</p>
       ) : (
-        <div className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)]`}>
-          <div className="overflow-x-auto">
+        <div className="table-shell">
+          <div className="table-scroll">
             <table className="min-w-full divide-y divide-[color:var(--border-color)]">
-              <thead className="bg-[color:var(--background)]">
+              <thead>
                 <tr>
                   <th scope="col" className={thClasses}>Tanggal</th>
                   <th scope="col" className={thClasses}>Tipe</th>
-                  <th scope="col" className={thClasses}>Customer/Supplier</th>
+                  <th scope="col" className={thClasses}>Customer / Supplier</th>
                   <th scope="col" className={thClasses}>No. SJ</th>
                   <th scope="col" className={thClasses}>No. Inv</th>
                   <th scope="col" className={`${thClasses} text-right`}>Berat (kg)</th>
@@ -127,16 +128,12 @@ export default function ItemTransactionDetailsPage() {
                   <th scope="col" className={`${thClasses} text-right`}>Total Harga</th>
                 </tr>
               </thead>
-              <tbody className="bg-[color:var(--card-bg)] divide-y divide-[color:var(--border-color)]">
+              <tbody className="divide-y divide-[color:var(--border-color)]">
                 {transactions.map((tx) => (
-                  <tr key={tx._id as string} className="hover:bg-[color:var(--background)] transition-colors duration-150">
+                  <tr key={tx._id as string} className="transition-colors duration-150">
                     <td className={tdTextMuted}>{new Date(tx.tanggal).toLocaleDateString('id-ID')}</td>
                     <td className={`${tdBaseClasses}`}>
-                      <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        tx.tipe === 'PENJUALAN' 
-                          ? 'bg-red-100 text-red-700' 
-                          : 'bg-green-100 text-green-700'
-                      }`}>
+                      <span className="table-chip">
                         {tx.tipe}
                       </span>
                     </td>

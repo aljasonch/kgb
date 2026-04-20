@@ -12,17 +12,23 @@ export default function ItemsPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Manajemen Stok Barang</h1>
+    <div className="page-shell">
+      <header className="page-header">
+        <p className="eyebrow">Stok</p>
+        <h1 className="page-title">Manajemen stok barang</h1>
+        <p className="page-description">
+          Tambahkan barang baru, cari item yang sudah ada, dan lakukan penyesuaian stok.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
+      <div className="split-layout">
+        <div>
           <ItemForm onItemAdded={handleItemAdded} />
         </div>
-        <div className="md:col-span-2">
-          <h2 className="text-2xl font-semibold text-[color:var(--foreground)] mb-4">Daftar Barang</h2>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="eyebrow">Daftar Barang</p>
+          </div>
           <ItemsList refreshKey={refreshKey} />
         </div>
       </div>

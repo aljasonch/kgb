@@ -124,20 +124,30 @@ export default function PurchaseReportPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Laporan Pembelian</h1>
-        <button
-          onClick={handleExport}
-          disabled={isLoadingReport || reportData.length === 0}
-          className="px-4 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors duration-150 ease-in-out"
-        >
-          Ekspor ke Excel
-        </button> 
+    <div className="page-shell">
+      <header className="page-header">
+        <div className="page-header-row">
+          <div className="space-y-2">
+            <p className="eyebrow">Laporan</p>
+            <h1 className="page-title">Laporan pembelian</h1>
+            <p className="page-description">
+              List transaksi pembelian dengan berbagai filter.
+            </p>
+          </div>
+        </div>
+        <div className="page-action">
+          <button
+            onClick={handleExport}
+            disabled={isLoadingReport || reportData.length === 0}
+            className="btn-primary"
+          >
+            Ekspor ke Excel
+          </button>
+        </div>
       </header>
 
       <div className="mb-6">
-        {itemsError && <p className="text-red-500">Error loading items for filter: {itemsError}</p>}
+        {itemsError && <div className="status-message status-danger">Error memuat daftar barang: {itemsError}</div>}
         <SalesReportFilters
             onFilterChange={handleFilterChange}
             items={items}
@@ -147,13 +157,11 @@ export default function PurchaseReportPage() {
         />
       </div>
 
-      <div>
-        <SalesReportTable
-            reportData={reportData}
-            isLoading={isLoadingReport}
-            error={reportError}
-        />
-      </div>
+      <SalesReportTable
+          reportData={reportData}
+          isLoading={isLoadingReport}
+          error={reportError}
+      />
     </div>
   );
 }

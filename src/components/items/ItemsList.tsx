@@ -150,14 +150,12 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
     setCurrentPage(1); // Reset to first page on search
   };
 
-  const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75";
-  const themedTextError = "text-center text-red-600";
   const showEmptyState = !isLoading && !error && allItems.length === 0;
 
   return (
     <>
-      <div className="mb-6 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <div className="search-input">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           <FaSearch className="text-gray-400" />
         </div>
         <input
@@ -165,44 +163,42 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
           placeholder="Cari nama barang..."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="pl-10 pr-4 py-2 w-full border border-[color:var(--border-color)] rounded-lg bg-[color:var(--card-bg)] text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
+          className="form-input"
         />
         {isLoading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <div className="w-4 h-4 border-2 border-t-[color:var(--primary)] border-gray-200 rounded-full animate-spin" />
           </div>
         )}
       </div>
 
       {error && (
-        <div className="p-4 my-4 bg-opacity-10 rounded-md">
-          <p className={themedTextError}>Error: {error}</p>
-        </div>
+        <div className="status-message status-danger">Error: {error}</div>
       )}
 
       {showEmptyState && (
         <>
-          <p className={themedTextMuted}>No items found.</p>
+          <div className="empty-state">Tidak ada barang yang cocok dengan pencarian ini.</div>
           {totalPages > 1 && (
-            <div className="mt-6 flex justify-center items-center space-x-3">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1 || isLoading}
-                className="px-4 py-2 text-sm font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[color:var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-secondary"
               >
-                Previous
+                Sebelumnya
               </button>
               <span className="text-sm text-[color:var(--foreground)]">
-                Page {currentPage} of {totalPages}
+                Halaman {currentPage} dari {totalPages}
               </span>
               <button
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
                 disabled={currentPage === totalPages || isLoading}
-                className="px-4 py-2 text-sm font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[color:var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-secondary"
               >
-                Next
+                Berikutnya
               </button>
             </div>
           )}
@@ -210,39 +206,36 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
       )}
 
       {!error && !showEmptyState && (
-        <div
-          className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${isLoading && allItems.length === 0 ? "opacity-0" : "opacity-100"
-            }`}
-        >
+        <div className={`table-shell transition-opacity duration-500 ease-in-out ${isLoading && allItems.length === 0 ? "opacity-0" : "opacity-100"}`}>
           <ul role="list" className="divide-y divide-[color:var(--border-color)]">
             {paginatedItems.map((item) => (
               <li
                 key={item._id.toString()}
-                className="px-4 py-5 sm:px-6  transition-colors duration-150 ease-in-out"
+                className="px-4 py-5 sm:px-6 transition-colors duration-150 ease-in-out hover:bg-[color:var(--surface-highlight)]"
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-md font-semibold text-[color:var(--primary)] truncate">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="truncate text-base font-semibold text-[color:var(--foreground)]">
                     {item.namaBarang}
                   </p>
                   <div className="ml-2 flex-shrink-0 flex">
-                    <p className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    <p className="table-chip mono">
                       Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
                     </p>
                   </div>
                 </div>
                 <div className="mt-2.5 sm:flex sm:justify-between">
                   <div className="sm:flex">
-                    <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75">
+                    <p className="flex items-center text-sm text-[color:var(--ink-soft)]">
                       Stok: {item.stokSaatIni?.toFixed(0) ?? 'N/A'}
                     </p>
-                    <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:ml-4">
+                    <p className="flex items-center text-sm text-[color:var(--ink-soft)] sm:ml-4">
                       Masuk: {item.totalMasuk?.toFixed(0) ?? '0'}
                     </p>
-                    <p className="flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:ml-4">
+                    <p className="flex items-center text-sm text-[color:var(--ink-soft)] sm:ml-4">
                       Keluar: {item.totalKeluar?.toFixed(0) ?? '0'}
                     </p>
                   </div>
-                  <div className="mt-2 flex items-center text-sm text-[color:var(--foreground)] opacity-75 sm:mt-0 sm:ml-4">
+                  <div className="mt-2 flex items-center text-sm text-[color:var(--ink-soft)] sm:mt-0 sm:ml-4">
                     <p>
                       Ditambahkan:{' '}
                       {new Date(item.createdAt).toLocaleDateString("id-ID", {
@@ -252,9 +245,9 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       })}
                     </p>
                   </div>
-                  <div className="mt-3 sm:mt-0 sm:ml-auto flex space-x-3 items-center">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-0 sm:ml-auto">
                     <Link href={`/items/${item._id}/details`}>
-                      <span className="text-blue-600 cursor-pointer hover:text-blue-700 font-medium transition-colors duration-150 mr-3">
+                      <span className="table-link mr-3 cursor-pointer font-medium transition-colors duration-150">
                         Detail
                       </span>
                     </Link>
@@ -266,7 +259,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         setEditNameError(null);
                         setIsEditNameModalOpen(true);
                       }}
-                      className="text-yellow-600 cursor-pointer hover:text-yellow-700 font-medium transition-colors duration-150 mr-3"
+                      className="cursor-pointer font-medium text-[color:var(--ink-soft)] transition-colors duration-150 hover:text-[color:var(--foreground)] mr-3"
                     >
                       <FaEdit size={18} />
                     </button>
@@ -302,7 +295,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                           }
                         }
                       }}
-                      className="text-red-600 cursor-pointer hover:text-red-700 font-medium transition-colors duration-150"
+                      className="cursor-pointer font-medium text-[color:var(--danger)] transition-colors duration-150"
                     >
                       <FaRegTrashAlt size={18} />
                     </button>
@@ -315,7 +308,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         setAdjustmentError(null);
                         setIsStockModalOpen(true);
                       }}
-                      className="text-[color:var(--primary)] cursor-pointer hover:opacity-75 font-medium transition-colors duration-150"
+                      className="cursor-pointer font-medium text-[color:var(--primary)] transition-colors duration-150 hover:text-[color:var(--primary-hover)]"
                     >
                       <LuSettings2 size={18} />
                     </button>
@@ -331,13 +324,13 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
         <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
           onClick={() => setIsStockModalOpen(false)}>
           <div
-            className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
+            className="modal-sheet w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-5 border-b border-[color:var(--border-color)] bg-[color:var(--surface)]">
+            <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2  bg-opacity-10 rounded-lg">
+                  <div className="p-2">
                     <svg
                       className="w-6 h-6 text-[color:var(--primary)]"
                       fill="none"
@@ -369,7 +362,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                     setAdjustmentValue("");
                     setAdjustmentError(null);
                   }}
-                  className="p-2 hover:bg-[color:var(--surface)] rounded-lg transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-[color:var(--surface)]"
                 >
                   <svg
                     className="w-5 h-5 text-[color:var(--muted)]"
@@ -388,7 +381,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
               </div>
             </div>
             <div className="px-6 py-6 space-y-6">
-              <div className="p-4 bg-[color:var(--surface)] rounded-xl">
+              <div className="section-card-tight">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[color:var(--muted)]">
                     Stok Saat Ini
@@ -400,10 +393,10 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
               </div>
 
               {adjustmentError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="status-message status-danger">
                   <div className="flex items-center space-x-2">
                     <svg
-                      className="w-5 h-5 text-red-500"
+                      className="w-5 h-5 text-[color:var(--danger)]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -415,7 +408,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"
                       />
                     </svg>
-                    <p className="text-sm text-red-700">{adjustmentError}</p>
+                    <p className="text-sm">{adjustmentError}</p>
                   </div>
                 </div>
               )}
@@ -424,14 +417,14 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                 <label className="text-sm font-medium text-[color:var(--foreground)] block mb-3">
                   Tipe Penyesuaian
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {(["add", "subtract", "set"] as const).map((type) => (
                     <label
                       key={type}
                       className={`
                       relative flex items-center justify-center p-4 cursor-pointer rounded-xl border-2 transition-all
                       ${adjustmentType === type
-                          ? "border-[color:var(--primary)] bg-[color:var(--primary)] bg-opacity-10 text-white"
+                          ? "border-[color:var(--primary)] bg-[color:var(--accent-soft)] text-[color:var(--primary)]"
                           : "border-[color:var(--border-color)] hover:border-[color:var(--primary)] hover:bg-[color:var(--surface)]"
                         }
                     `}
@@ -504,7 +497,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       setAdjustmentValue(e.target.value);
                       setAdjustmentError(null);
                     }}
-                    className="form-input w-full pl-4 pr-12 py-3 text-[color:var(--foreground)] bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-xl shadow-sm focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)] transition-all"
+                    className="form-input pr-12"
                     step="any"
                     min={adjustmentType === "set" ? "0" : "0.01"}
                   />
@@ -516,8 +509,8 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                 </div>
               </div>
             </div>
-            <div className="px-6 py-4 bg-[color:var(--surface)] border-t border-[color:var(--border-color)]">
-              <div className="flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[color:var(--border-color)]">
+              <div className="flex flex-wrap justify-end gap-3">
                 <button
                   onClick={() => {
                     setIsStockModalOpen(false);
@@ -526,7 +519,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                     setAdjustmentValue("");
                     setAdjustmentError(null);
                   }}
-                  className="px-5 py-2.5 text-sm font-medium rounded-xl border border-[color:var(--border-color)] text-[color:var(--foreground)] hover:bg-[color:var(--card-bg)] transition-colors"
+                  className="btn-secondary"
                 >
                   Batal
                 </button>
@@ -588,7 +581,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       setAdjustmentError(errorMessage);
                     }
                   }}
-                  className="btn-primary px-5 py-2.5 text-sm font-medium rounded-xl"
+                  className="btn-primary"
                 >
                   Simpan Perubahan
                 </button>
@@ -601,15 +594,15 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
         <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
           onClick={() => setIsEditNameModalOpen(false)}>
           <div
-            className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-md mx-4 overflow-hidden animate-slideUp"
+            className="modal-sheet w-full max-w-md mx-4 overflow-hidden animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-5 border-b border-[color:var(--border-color)] bg-[color:var(--surface)]">
+            <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-opacity-10 rounded-lg">
+                  <div className="p-2">
                     <svg
-                      className="w-6 h-6 text-yellow-600"
+                      className="w-6 h-6 text-[color:var(--primary)]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -639,7 +632,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                     setNewItemName("");
                     setEditNameError(null);
                   }}
-                  className="p-2 hover:bg-[color:var(--surface)] rounded-lg transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-[color:var(--surface)]"
                 >
                   <svg
                     className="w-5 h-5 text-[color:var(--muted)]"
@@ -659,7 +652,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
             </div>
             <div className="px-6 py-6 space-y-6">
               {/* Current Name Info */}
-              <div className="p-4 bg-[color:var(--surface)] rounded-xl">
+              <div className="section-card-tight">
                 <div className="flex flex-col space-y-1">
                   <span className="text-sm text-[color:var(--muted)]">
                     Nama Saat Ini
@@ -671,10 +664,10 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
               </div>
 
               {editNameError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="status-message status-danger">
                   <div className="flex items-center space-x-2">
                     <svg
-                      className="w-5 h-5 text-red-500"
+                      className="w-5 h-5 text-[color:var(--danger)]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -686,7 +679,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"
                       />
                     </svg>
-                    <p className="text-sm text-red-700">{editNameError}</p>
+                    <p className="text-sm">{editNameError}</p>
                   </div>
                 </div>
               )}
@@ -708,15 +701,15 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       setNewItemName(e.target.value);
                       setEditNameError(null);
                     }}
-                    className="form-input w-full pl-4 pr-4 py-3 text-[color:var(--foreground)] bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                    className="form-input"
                     autoComplete="off"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-[color:var(--surface)] border-t border-[color:var(--border-color)]">
-              <div className="flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[color:var(--border-color)]">
+              <div className="flex flex-wrap justify-end gap-3">
                 <button
                   onClick={() => {
                     setIsEditNameModalOpen(false);
@@ -725,7 +718,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                     setNewItemName("");
                     setEditNameError(null);
                   }}
-                  className="px-5 py-2.5 text-sm cursor-pointer font-medium rounded-xl border border-[color:var(--border-color)] text-[color:var(--foreground)] hover:bg-[color:var(--card-bg)] transition-colors"
+                  className="btn-secondary"
                 >
                   Batal
                 </button>
@@ -781,7 +774,7 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
                       setEditNameError(errorMessage);
                     }
                   }}
-                  className="px-5 py-2.5 text-sm cursor-pointer font-medium rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
+                  className="btn-primary"
                 >
                   Simpan Perubahan
                 </button>
@@ -792,25 +785,25 @@ export default function ItemsList({ initialItems: initialItemsProp, refreshKey }
       )}
 
       {totalPages > 0 && (
-        <div className="mt-6 flex justify-center items-center space-x-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1 || isLoading}
-            className="px-4 py-2 text-sm cursor-pointer font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent"
+            className="btn-secondary"
           >
-            Previous
+            Sebelumnya
           </button>
           <span className="text-sm text-[color:var(--foreground)]">
-            Page {currentPage} of {totalPages} (Total: {totalItems})
+            Halaman {currentPage} dari {totalPages} (Total: {totalItems})
           </span>
           <button
             onClick={() =>
               setCurrentPage((prev) => Math.min(totalPages, prev + 1))
             }
             disabled={currentPage === totalPages || isLoading}
-            className="px-4 py-2 text-sm cursor-pointer font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent"
+            className="btn-secondary"
           >
-            Next
+            Berikutnya
           </button>
         </div>
       )}

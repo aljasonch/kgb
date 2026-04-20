@@ -25,12 +25,12 @@ export default function EditTransactionPage() {
           const response = await fetchWithAuth(`/api/transactions/${id}`);
           if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.message || 'Failed to fetch transaction data.');
+            throw new Error(data.message || 'Gagal memuat data transaksi.');
           }
           const data = await response.json();
           setTransaction(data.transaction);
         } catch (err: unknown) {
-          setError(err instanceof Error ? err.message : 'An unknown error occurred');
+          setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.');
         } finally {
           setIsLoading(false);
         }
@@ -38,7 +38,7 @@ export default function EditTransactionPage() {
       fetchTransaction();
     } else {
       setIsLoading(false);
-      setError("Transaction ID is missing.");
+      setError("ID transaksi tidak tersedia.");
     }
   }, [id]);
 
@@ -47,17 +47,15 @@ export default function EditTransactionPage() {
   };
 
   if (isLoading) {
-    return <p className="text-center text-gray-500 py-8">Loading transaction data...</p>;
+    return <p className="text-center py-8 text-sm text-[color:var(--muted)]">Memuat data transaksi…</p>;
   }
 
   if (error) {
     return (
-      <div className="text-center text-red-500 py-8">
+      <div className="page-shell">
         <p>Error: {error}</p>
-        <Link href="/transactions" legacyBehavior>
-          <a className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block">
-            Back to Transactions
-          </a>
+        <Link href="/transactions" className="link-accent mt-4 inline-block">
+          Kembali ke transaksi
         </Link>
       </div>
     );
@@ -65,22 +63,21 @@ export default function EditTransactionPage() {
 
   if (!transaction) {
     return (
-      <div className="text-center text-gray-500 py-8">
-        <p>Transaction not found.</p>
-        <Link href="/transactions" legacyBehavior>
-          <a className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block">
-            Back to Transactions
-          </a>
+      <div className="page-shell">
+        <p>Transaksi tidak ditemukan.</p>
+        <Link href="/transactions" className="link-accent mt-4 inline-block">
+          Kembali ke transaksi
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Edit Transaksi</h1>
-        <p className="text-sm text-[color:var(--muted)]">ID Transaksi: {id}</p>
+    <div className="page-shell">
+      <header className="page-header">
+        <p className="eyebrow">Transaksi</p>
+        <h1 className="page-title text-3xl">Edit transaksi</h1>
+        <p className="page-description mono">ID transaksi: {id}</p>
       </header>
       <TransactionForm
         onTransactionAdded={handleTransactionUpdated}

@@ -3,200 +3,333 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const reportLinks = [
+  { href: '/reports/sales', label: 'Penjualan' },
+  { href: '/reports/purchases', label: 'Pembelian' },
+  { href: '/reports/items', label: 'Stok' },
+  { href: '/reports/accounts', label: 'Piutang & Utang' },
+];
 
 export default function ClientNav() {
   const { isAuthenticated, logout, isLoading } = useAuth();
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isReportsMenuOpen, setIsReportsMenuOpen] = useState(false);
+  const [isMobileReportsOpen, setIsMobileReportsOpen] = useState(false);
+  const reportsMenuRef = useRef<HTMLDivElement | null>(null);
+  const isReportsRoute = pathname.startsWith('/reports');
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const navLinkClasses = (path: string) =>
-    `py-2 px-4 rounded-lg transition-all duration-300 ease-out font-medium relative group
-    ${pathname === path
-      ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]'
-      : 'text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-highlight)]'
-    } cursor-pointer`;
-
-  const mobileNavLinkClasses = (path: string) =>
-    `block py-3 px-4 text-sm transition-all duration-200 ease-out font-medium rounded-lg mx-2 my-1
-    ${pathname === path
-      ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]'
-      : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'
-    }`;
-
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [pathname]);
+    setIsReportsMenuOpen(false);
+    setIsMobileReportsOpen(isReportsRoute);
+  }, [pathname, isReportsRoute]);
 
-  if (!isMounted) {
-    return (
-      <nav className="glass shadow-sm border-b border-[color:var(--border-color)]">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/">
-            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer tracking-tight">Stocklet</span>
-          </Link>
-        </div>
-      </nav>
-    );
-  }
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (reportsMenuRef.current && !reportsMenuRef.current.contains(event.target as Node)) {
+        setIsReportsMenuOpen(false);
+      }
+    };
 
-  if (isLoading) {
-    return (
-      <nav className="glass shadow-sm border-b border-[color:var(--border-color)]">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/">
-            <span className="text-2xl font-bold text-[color:var(--primary)] cursor-pointer tracking-tight">Stocklet</span>
-          </Link>
-          <div className="space-x-4">
-            <span className="text-sm animate-pulse text-[color:var(--muted)]">Loading...</span>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
+  const baseLinkClass =
+    'inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200';
+
+  const navLinkClass = (active: boolean) =>
+    `${baseLinkClass} ${
+      active
+        ? 'bg-[color:var(--accent-soft)] text-[color:var(--primary)]'
+        : 'text-[color:var(--ink-soft)] hover:bg-[color:var(--surface)] hover:text-[color:var(--foreground)]'
+    }`;
+
+  const mobileLinkClass = (active: boolean) =>
+    `block rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+      active
+        ? 'bg-[color:var(--accent-soft)] text-[color:var(--primary)]'
+        : 'text-[color:var(--ink-soft)] hover:bg-[color:var(--surface)] hover:text-[color:var(--foreground)]'
+    }`;
+
+  const mobileSidebarLinkClass = (active: boolean) =>
+    `${navLinkClass(active)} w-full justify-start px-4 py-3`;
 
   return (
-    <nav className="glass sticky top-0 z-50 border-b border-[color:var(--border-color)]">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Link href="/">
-          <span className="text-3xl font-bold text-[color:var(--primary)] cursor-pointer hover:text-[color:var(--primary-hover)] transition-colors duration-300 flex items-center gap-2 tracking-tight">
-            Stocklet
-          </span>
-        </Link>
-
-        <div className="md:hidden">
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-lg text-[color:var(--foreground)] hover:text-[color:var(--primary)] hover:bg-[color:var(--surface-highlight)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-200"
-            aria-label="Toggle menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
-              )}
-            </svg>
-          </button>
+    <nav className="border-b border-[color:var(--border-color)] bg-[color:var(--background)]">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center">
+          <Link href="/" className="min-w-0">
+            <span className="block text-xl font-semibold tracking-[-0.04em] text-[color:var(--foreground)]">
+              Stocklet
+            </span>
+            <span className="eyebrow hidden sm:block">Operasional stok</span>
+          </Link>
         </div>
 
-        <div className="hidden font-semibold md:flex space-x-2 items-center">
-          <Link href="/"><span className={navLinkClasses('/')}>Home</span></Link>
+        {isMounted && (
+          <div className="hidden items-center gap-2 md:ml-auto md:flex">
+            <Link href="/" className={navLinkClass(pathname === '/')}>
+              Beranda
+            </Link>
 
-          {isAuthenticated && (
-            <>
-              <Link href="/items"><span className={navLinkClasses('/items')}>Stok</span></Link>
-              <Link href="/transactions"><span className={navLinkClasses('/transactions')}>Transaksi</span></Link>
-              <div className="relative group">
-                <button className={`${navLinkClasses('/reports')} flex items-center gap-1`}>
-                  Laporan
-                  <svg className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <div className="absolute left-0 mt-2 w-64 rounded-xl shadow-2xl glass ring-1 ring-[color:var(--border-color)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform group-hover:translate-y-1 z-20 overflow-hidden">
-                  <div className="py-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    <Link href="/reports/sales">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/sales' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
-                        Laporan Penjualan
-                      </span>
-                    </Link>
-                    <Link href="/reports/purchases">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/purchases' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
-                        Laporan Pembelian
-                      </span>
-                    </Link>
-                    <Link href="/reports/items">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/items' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
-                        Laporan Stok
-                      </span>
-                    </Link>
-                    <Link href="/reports/accounts">
-                      <span className={`block px-4 py-3 text-sm font-medium mx-2 rounded-lg transition-all duration-200 ${pathname === '/reports/accounts' ? 'text-[color:var(--primary)] bg-[color:var(--primary-soft)]' : 'text-[color:var(--muted)] hover:bg-[color:var(--surface-highlight)] hover:text-[color:var(--foreground)]'}`} role="menuitem">
-                        Piutang/Utang
-                      </span>
-                    </Link>
+            {isAuthenticated && (
+              <>
+                <Link href="/items" className={navLinkClass(pathname === '/items' || pathname.startsWith('/items/'))}>
+                  Stok
+                </Link>
+                <Link href="/transactions" className={navLinkClass(pathname === '/transactions' || pathname.startsWith('/transactions/'))}>
+                  Transaksi
+                </Link>
+                <div
+                  ref={reportsMenuRef}
+                  className="relative"
+                  onMouseEnter={() => setIsReportsMenuOpen(true)}
+                  onMouseLeave={() => setIsReportsMenuOpen(false)}
+                >
+                  <Link
+                    href="/reports/sales"
+                    className={navLinkClass(isReportsRoute)}
+                    aria-expanded={isReportsMenuOpen}
+                    aria-haspopup="menu"
+                  >
+                    <span>Laporan</span>
+                    <svg
+                      className={`h-4 w-4 transition-transform duration-200 ${isReportsMenuOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+                    </svg>
+                  </Link>
+
+                  <div
+                    className={`absolute left-0 top-full z-30 mt-2 w-56 rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)] p-2 transition-all duration-200 ${
+                      isReportsMenuOpen
+                        ? 'visible translate-y-0 opacity-100'
+                        : 'invisible -translate-y-1 opacity-0'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-1">
+                      {reportLinks.map((link) => (
+                        <Link key={link.href} href={link.href} className={mobileLinkClass(pathname === link.href)}>
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
+        )}
 
-          {isAuthenticated ? (
-            <button
-              onClick={logout}
-              title="Logout"
-              className="p-2 rounded-full text-[color:var(--danger)] opacity-75 hover:opacity-100 hover:bg-[color:var(--danger-soft)] focus:outline-none focus:ring-2 focus:ring-[color:var(--danger)] transition-all duration-200 ease-in-out ml-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
+        <div className="hidden items-center gap-2 md:flex">
+          {isLoading ? (
+            <span className="text-sm text-[color:var(--muted)]">Memuat sesi…</span>
+          ) : isAuthenticated ? (
+            <button onClick={logout} type="button" className="btn-secondary">
+              Keluar
             </button>
           ) : (
-            pathname !== '/login' && (
-              <Link href="/login"><span className={navLinkClasses('/login')}>Login</span></Link>
-            )
-          )}
-          {!isAuthenticated && process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === 'true' && pathname !== '/register' && (
-            <Link href="/register"><span className={navLinkClasses('/register')}>Register</span></Link>
-          )}
-        </div>
-      </div>
-
-      <div
-        className={`md:hidden absolute top-full left-0 right-0 glass border-t border-[color:var(--border-color)] transition-all duration-300 ease-in-out transform origin-top ${isMobileMenuOpen ? 'scale-y-100 opacity-100 visible' : 'scale-y-0 opacity-0 invisible'}`}
-      >
-        <div className="pt-2 pb-3 space-y-1">
-          <Link href="/"><span className={mobileNavLinkClasses('/')} onClick={toggleMobileMenu}>Home</span></Link>
-
-          {isAuthenticated && (
             <>
-              <Link href="/items"><span className={mobileNavLinkClasses('/items')} onClick={toggleMobileMenu}>Stok</span></Link>
-              <Link href="/transactions"><span className={mobileNavLinkClasses('/transactions')} onClick={toggleMobileMenu}>Transaksi</span></Link>
-              <Link href="/reports/sales"><span className={mobileNavLinkClasses('/reports/sales')} onClick={toggleMobileMenu}>Laporan Penjualan</span></Link>
-              <Link href="/reports/purchases"><span className={mobileNavLinkClasses('/reports/purchases')} onClick={toggleMobileMenu}>Laporan Pembelian</span></Link>
-              <Link href="/reports/accounts"><span className={mobileNavLinkClasses('/reports/accounts')} onClick={toggleMobileMenu}>Laporan Piutang/Utang</span></Link>
+              {pathname !== '/login' && (
+                <Link href="/login" className="btn-secondary">
+                  Masuk
+                </Link>
+              )}
+              {process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === 'true' && pathname !== '/register' && (
+                <Link href="/register" className="btn-primary">
+                  Daftar
+                </Link>
+              )}
             </>
           )}
-
-          {isAuthenticated ? (
-            <button
-              onClick={() => { logout(); toggleMobileMenu(); }}
-              className={`w-full text-left text-[color:var(--danger)] ${mobileNavLinkClasses('/logout-button-placeholder-mobile')}`}
-            >
-              Logout
-            </button>
-          ) : (
-            pathname !== '/login' && (
-              <Link href="/login"><span className={mobileNavLinkClasses('/login')} onClick={toggleMobileMenu}>Login</span></Link>
-            )
-          )}
-          {!isAuthenticated && process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === 'true' && pathname !== '/register' && (
-            <Link href="/register"><span className={mobileNavLinkClasses('/register')} onClick={toggleMobileMenu}>Register</span></Link>
-          )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen((open) => !open)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[color:var(--foreground)] transition-all duration-200 hover:bg-[color:var(--surface)] md:hidden"
+          aria-label="Buka navigasi"
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-sidebar-nav"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            {isMobileMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+            )}
+          </svg>
+        </button>
       </div>
+
+      {isMounted && (
+        <>
+          <div
+            className={`fixed inset-0 z-40 bg-[rgba(24,23,19,0.28)] transition-opacity duration-200 md:hidden ${
+              isMobileMenuOpen ? 'visible opacity-100' : 'invisible opacity-0 pointer-events-none'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          <aside
+            id="mobile-sidebar-nav"
+            className={`fixed inset-y-0 right-0 z-50 flex w-[min(88vw,360px)] flex-col border-l border-[color:var(--border-color)] bg-[color:var(--background)] p-4 transition-transform duration-200 md:hidden ${
+              isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            aria-label="Navigasi mobile"
+            aria-hidden={!isMobileMenuOpen}
+          >
+            <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-3">
+              <div>
+                <p className="text-base font-semibold text-[color:var(--foreground)]">Navigasi</p>
+                <p className="eyebrow">Menu</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[color:var(--foreground)] transition-colors duration-200 hover:bg-[color:var(--surface)]"
+                aria-label="Tutup navigasi"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-1 flex-col gap-2 overflow-y-auto pb-4">
+              <Link href="/" className={mobileSidebarLinkClass(pathname === '/')} onClick={() => setIsMobileMenuOpen(false)}>
+                Beranda
+              </Link>
+
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/items"
+                    className={mobileSidebarLinkClass(pathname === '/items' || pathname.startsWith('/items/'))}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Stok
+                  </Link>
+                  <Link
+                    href="/transactions"
+                    className={mobileSidebarLinkClass(pathname === '/transactions' || pathname.startsWith('/transactions/'))}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Transaksi
+                  </Link>
+
+                  <div className="overflow-hidden rounded-2xl">
+                    <Link
+                      href="/reports/sales"
+                      className={`${mobileSidebarLinkClass(isReportsRoute || isMobileReportsOpen)} w-full justify-between rounded-none bg-transparent`}
+                      aria-expanded={isMobileReportsOpen}
+                      aria-haspopup="menu"
+                      onClick={(event) => {
+                        if (isReportsRoute) {
+                          event.preventDefault();
+                          setIsMobileReportsOpen((open) => !open);
+                          return;
+                        }
+
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <span>Laporan</span>
+                      <svg
+                        className={`h-4 w-4 transition-transform duration-200 ${isMobileReportsOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+                      </svg>
+                    </Link>
+
+                    <div
+                      className={`grid transition-all duration-200 ${
+                        isMobileReportsOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="flex flex-col gap-1 p-2">
+                          {reportLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className={`${mobileSidebarLinkClass(pathname === link.href)} pl-8`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="border-t border-[color:var(--border-color)] pt-4">
+              {isLoading ? (
+                <span className="px-4 py-2 text-sm text-[color:var(--muted)]">Memuat sesi…</span>
+              ) : isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    logout();
+                  }}
+                  type="button"
+                  className="btn-secondary w-full"
+                >
+                  Keluar
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {pathname !== '/login' && (
+                    <Link href="/login" className="btn-secondary w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                      Masuk
+                    </Link>
+                  )}
+                  {process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === 'true' && pathname !== '/register' && (
+                    <Link href="/register" className="btn-primary w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                      Daftar
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          </aside>
+        </>
+      )}
     </nav>
   );
 }

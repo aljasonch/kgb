@@ -35,7 +35,7 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
       const response = await fetchWithAuth(url);
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch transactions');
+        throw new Error(errorData.message || 'Gagal memuat transaksi.');
       }
       const data = await response.json();
       setTransactions(data.transactions || []);
@@ -43,7 +43,7 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
       setTotalPages(data.totalPages);
       setTotalItems(data.totalItems);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak terduga.');
       setTransactions([]);
     } finally {
       setIsLoading(false);
@@ -76,22 +76,22 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
 
   return (
     <div className="mt-6">
-      <div className="mb-4 flex space-x-2">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:gap-2">
         <button
           onClick={() => handleFilterTypeChange('ALL')}
-          className={`btn-secondary ${filterType === 'ALL' ? '!bg-[color:var(--primary)] !text-white !border-[color:var(--primary)] hover:!bg-[color:var(--primary-hover)]' : ''}`}
+          className={`btn-secondary w-full sm:w-auto ${filterType === 'ALL' ? '!bg-[color:var(--primary)] !text-white !border-[color:var(--primary)] hover:!bg-[color:var(--primary-hover)]' : ''}`}
         >
           Semua
         </button>
         <button
           onClick={() => handleFilterTypeChange(TransactionType.PENJUALAN)}
-          className={`btn-secondary ${filterType === TransactionType.PENJUALAN ? '!bg-red-500 !text-white !border-red-500 hover:!bg-red-600' : ''}`}
+          className={`btn-secondary w-full sm:w-auto ${filterType === TransactionType.PENJUALAN ? '!bg-red-500 !text-white !border-red-500 hover:!bg-red-600' : ''}`}
         >
           Penjualan
         </button>
         <button
           onClick={() => handleFilterTypeChange(TransactionType.PEMBELIAN)}
-          className={`btn-secondary ${filterType === TransactionType.PEMBELIAN ? '!bg-green-500 !text-white !border-green-500 hover:!bg-green-600' : ''}`}
+          className={`btn-secondary w-full sm:w-auto ${filterType === TransactionType.PEMBELIAN ? '!bg-green-500 !text-white !border-green-500 hover:!bg-green-600' : ''}`}
         >
           Pembelian
         </button>
@@ -100,7 +100,7 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
       {isLoading ? (
         <div className="flex items-center justify-center space-x-3 py-6">
           <div className="w-5 h-5 border-2 border-t-[color:var(--primary)] border-gray-200 rounded-full animate-spin"></div>
-          <p className={themedTextMuted}>Loading transactions...</p>
+          <p className={themedTextMuted}>Memuat transaksi…</p>
         </div>
       ) : error ? (
         <div className="p-4 my-4 bg-opacity-10 rounded-md">
@@ -108,19 +108,19 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
         </div>
       ) : transactions.length === 0 ? (
         <p className={themedTextMuted}>
-          {filterType === 'ALL' ? 'No transactions found.' : (() => {
+          {filterType === 'ALL' ? 'Belum ada transaksi.' : (() => {
             switch (filterType) {
               case TransactionType.PENJUALAN:
-                return 'No sales transactions found.';
+                return 'Belum ada transaksi penjualan.';
               case TransactionType.PEMBELIAN:
-                return 'No purchase transactions found.';
+                return 'Belum ada transaksi pembelian.';
               default:
-                return 'No transactions found for the selected type.';
+                return 'Belum ada transaksi untuk tipe yang dipilih.';
             }
           })()}
         </p>
       ) : (
-        <div className={`bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)]`}>
+        <div className="bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)]">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-[color:var(--border-color)]">
               <thead className="bg-[color:var(--background)]">
@@ -186,7 +186,7 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
                         }}
                         className="text-red-600 hover:text-red-700 cursor-pointer transition-colors duration-150"
                       >
-                        Delete
+                        Hapus
                       </button>
                     </td>
                   </tr>
@@ -198,23 +198,23 @@ export default function TransactionsList({ refreshKey }: TransactionsListProps) 
       )}
 
       {!isLoading && !error && totalPages > 0 && (
-        <div className="mt-6 flex justify-center items-center space-x-3">
+        <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center sm:space-x-3 sm:gap-0">
           <button
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1 || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-md cursor-pointer btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-md cursor-pointer btn-secondary disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
-            Previous
+            Sebelumnya
           </button>
-          <span className="text-sm text-[color:var(--foreground)]">
-            Page {currentPage} of {totalPages} (Total: {totalItems})
+          <span className="text-center text-sm text-[color:var(--foreground)]">
+            Halaman {currentPage} dari {totalPages} (Total: {totalItems})
           </span>
           <button
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages || isLoading}
-            className="px-4 py-2 text-sm font-medium rounded-md cursor-pointer btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium rounded-md cursor-pointer btn-secondary disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
-            Next
+            Berikutnya
           </button>
         </div>
       )}

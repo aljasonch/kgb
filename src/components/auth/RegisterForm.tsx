@@ -17,7 +17,7 @@ export default function RegisterForm() {
     setSuccessMessage(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Konfirmasi kata sandi tidak sama.');
       setIsLoading(false);
       return;
     }
@@ -34,114 +34,77 @@ export default function RegisterForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || 'Pendaftaran gagal.');
       }
 
-      setSuccessMessage(data.message + ' You can now log in.');
+      setSuccessMessage(`${data.message} Anda bisa langsung masuk setelah ini.`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak terduga.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputBaseClasses = "block w-full px-3 py-2.5 rounded-md shadow-sm sm:text-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)]";
-  const labelBaseClasses = "block text-sm font-medium text-[color:var(--foreground)] opacity-90";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6 rounded-lg">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label
-          htmlFor="email-register"
-          className={labelBaseClasses}
-        >
-          Email address
+        <label htmlFor="email-register" className="form-label">
+          Email
         </label>
-        <div className="mt-1">
-          <input
-            id="email-register"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputBaseClasses}
-            disabled={isLoading}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label
-          htmlFor="password-register"
-          className={labelBaseClasses}
-        >
-          Password
-        </label>
-        <div className="mt-1">
-          <input
-            id="password-register"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputBaseClasses}
-            disabled={isLoading}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label
-          htmlFor="confirm-password"
-          className={labelBaseClasses}
-        >
-          Confirm Password
-        </label>
-        <div className="mt-1">
-          <input
-            id="confirm-password"
-            name="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className={inputBaseClasses}
-            disabled={isLoading}
-          />
-        </div>
-      </div>
-
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
-      {successMessage && (
-        <p className="text-sm text-green-500">{successMessage}</p>
-      )}
-
-      <div>
-        <button
-          type="submit"
+        <input
+          id="email-register"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="form-input"
+          placeholder="nama@perusahaan.com"
           disabled={isLoading}
-          className="w-full btn-primary justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Registering...
-            </>
-          ) : (
-            'Register'
-          )}
-        </button>
+        />
       </div>
+
+      <div>
+        <label htmlFor="password-register" className="form-label">
+          Kata sandi
+        </label>
+        <input
+          id="password-register"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="form-input"
+          disabled={isLoading}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="confirm-password" className="form-label">
+          Konfirmasi kata sandi
+        </label>
+        <input
+          id="confirm-password"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="form-input"
+          disabled={isLoading}
+        />
+      </div>
+
+      {error && <div className="status-message status-danger">{error}</div>}
+      {successMessage && <div className="status-message status-success">{successMessage}</div>}
+
+      <button type="submit" disabled={isLoading} className="btn-primary w-full">
+        {isLoading ? 'Mendaftarkan akun…' : 'Daftar'}
+      </button>
     </form>
   );
 }

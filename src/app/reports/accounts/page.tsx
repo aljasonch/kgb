@@ -328,9 +328,9 @@ export default function AccountsPage() {
   };
 
   const renderTable = () => {
-    if (isLoading) return <p className="text-center py-4">Memuat data...</p>;
-    if (error) return <p className="text-center py-4 text-red-500">Error: {error}</p>;
-    if (reportData.length === 0) return <p className="text-center py-4">Tidak ada data ditemukan.</p>;
+    if (isLoading) return <p className="text-center py-4 text-sm text-[color:var(--muted)]">Memuat data…</p>;
+    if (error) return <div className="status-message status-danger">Error: {error}</div>;
+    if (reportData.length === 0) return <div className="empty-state">Tidak ada data ditemukan.</div>;
 
     const isReceivable = activeTab === 'receivable';
     const headers = isReceivable
@@ -338,9 +338,10 @@ export default function AccountsPage() {
       : ["Supplier", "Saldo Awal Utang", "Total Pembelian", "Total Pembayaran Dilakukan", "Saldo Akhir Utang", "Aksi"];
 
     return (
-      <div className="overflow-x-auto mt-6">
+      <div className="table-shell mt-6">
+        <div className="table-scroll">
         <table className="min-w-full divide-y divide-[color:var(--border-color)] border border-[color:var(--border-color)]">
-          <thead className="bg-[color:var(--surface)]">
+          <thead>
             <tr>
               {headers.map(header => (
                 <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted)] uppercase tracking-wider">
@@ -349,41 +350,41 @@ export default function AccountsPage() {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-[color:var(--card-bg)] divide-y divide-[color:var(--border-color)]">
+          <tbody className="divide-y divide-[color:var(--border-color)]">
             {reportData.map((item, index) => {
               const customerOrSupplierName = isReceivable ? (item as IReceivableData).customerName : (item as IPayableData).supplierName;
               return (
                 <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[color:var(--foreground)]">
+                  <td className="px-6 py-4 text-sm font-medium text-[color:var(--foreground)]">
                     {customerOrSupplierName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
+                  <td className="px-6 py-4 text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).initialReceivableBalance ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).initialPayableBalance ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
+                  <td className="px-6 py-4 text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).totalSales ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).totalPurchases ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
+                  <td className="px-6 py-4 text-sm text-[color:var(--muted)]">
                     {isReceivable
                       ? ((item as IReceivableData).totalPaymentsReceived ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).totalPaymentsMade ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[color:var(--foreground)]">
+                  <td className="px-6 py-4 text-sm font-semibold text-[color:var(--foreground)]">
                     {isReceivable
                       ? ((item as IReceivableData).finalReceivableBalance ?? 0).toLocaleString('id-ID')
                       : ((item as IPayableData).finalPayableBalance ?? 0).toLocaleString('id-ID')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--muted)]">
-                    <div className="flex space-x-2">
+                  <td className="px-6 py-4 text-sm text-[color:var(--muted)]">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleOpenPaymentHistory(customerOrSupplierName)}
-                        className="cursor-pointer flex items-center justify-center px-3 py-2 text-sm font-semibold text-white bg-blue-500 border-2 border-blue-500 rounded-xl shadow-sm hover:bg-blue-600 hover:border-blue-600 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-all duration-150"
+                        className="btn-secondary w-full sm:w-auto"
                       >
-                        Details
+                        Detail
                       </button>
                       <button
                         onClick={() => {
@@ -395,7 +396,7 @@ export default function AccountsPage() {
                           setPaymentFormError(null);
                           setPaymentFormSuccess(null);
                         }}
-                        className="cursor-pointer flex items-center justify-center px-3 py-2 text-sm font-semibold text-white bg-green-500 border-2 border-green-500 rounded-xl shadow-sm hover:bg-green-600 hover:border-green-600 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 transition-all duration-150"
+                        className="btn-primary w-full sm:w-auto"
                       >
                         Input Pembayaran
                       </button>
@@ -406,18 +407,22 @@ export default function AccountsPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
 
   const renderInitialBalanceForm = () => {
     return (
-      <form onSubmit={handleSetInitialBalance} className="mt-6 p-6 shadow-md rounded-lg bg-[color:var(--card-bg)] space-y-4">
-        <h3 className="text-lg font-medium">Atur Saldo Awal {activeTab === 'receivable' ? 'Piutang' : 'Utang'}</h3>
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      <form onSubmit={handleSetInitialBalance} className="section-card space-y-4">
+        <div className="space-y-2">
+          <p className="eyebrow">Saldo awal</p>
+          <h3 className="section-title">Atur saldo awal {activeTab === 'receivable' ? 'piutang' : 'utang'}</h3>
+        </div>
+        {error && <div className="status-message status-danger">{error}</div>}
         <div className="relative">
-          <label htmlFor="customerSearchBalance" className="block text-sm font-medium text-[color:var(--foreground)]">
-            Customer/Supplier:
+          <label htmlFor="customerSearchBalance" className="form-label">
+            Customer atau supplier
           </label>
           <input
             type="text"
@@ -430,19 +435,19 @@ export default function AccountsPage() {
               }
             }}
             placeholder="Ketik untuk mencari atau masukkan nama baru"
-            className="mt-1 block w-full px-3 py-2 border border-[color:var(--border-color)] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-[color:var(--background)] text-[color:var(--foreground)]"
+            className="form-input"
           />
           {isLoadingCustomerSearch && <p className="mt-1 text-xs text-[color:var(--muted)]">Mencari...</p>}
           {showCustomerSearchResults && customerSearchResults.length > 0 && (
             <ul
-              className="absolute z-10 w-full bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg mt-1 max-h-40 overflow-auto"
+              className="absolute z-10 mt-2 max-h-40 w-full overflow-auto rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)]"
               onMouseLeave={() => setTimeout(() => setShowCustomerSearchResults(false), 200)}
             >
               {customerSearchResults.map((name) => (
                 <li
                   key={name}
                   onClick={() => handleSelectCustomerFromSearch(name)}
-                  className="px-3 py-2 hover:bg-[color:var(--surface)] cursor-pointer text-sm text-[color:var(--foreground)]"
+                  className="cursor-pointer px-4 py-3 text-sm text-[color:var(--foreground)] hover:bg-[color:var(--surface)]"
                 >
                   {name}
                 </li>
@@ -451,8 +456,8 @@ export default function AccountsPage() {
           )}
         </div>
         <div>
-          <label htmlFor="initialBalance" className="block text-sm font-medium text-[color:var(--foreground)]">
-            Nominal Saldo Awal {activeTab === 'receivable' ? 'Piutang' : 'Utang'}:
+          <label htmlFor="initialBalance" className="form-label">
+            Nominal saldo awal {activeTab === 'receivable' ? 'piutang' : 'utang'}
           </label>
           <input
             type="number"
@@ -460,14 +465,14 @@ export default function AccountsPage() {
             value={initialBalanceValue}
             onChange={(e) => setInitialBalanceValue(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-[color:var(--border-color)] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-[color:var(--background)] text-[color:var(--foreground)]"
+            className="form-input"
           />
         </div>
-        {balanceFormError && <p className="text-sm text-red-500">{balanceFormError}</p>}
-        {balanceFormSuccess && <p className="text-sm text-green-500">{balanceFormSuccess}</p>}
+        {balanceFormError && <div className="status-message status-danger">{balanceFormError}</div>}
+        {balanceFormSuccess && <div className="status-message status-success">{balanceFormSuccess}</div>}
         <button
           type="submit"
-          className="px-4 py-2 bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] cursor-pointer text-white rounded-md text-sm font-medium"
+          className="btn-primary w-full sm:w-auto"
         >
           Simpan Saldo Awal
         </button>
@@ -482,18 +487,15 @@ export default function AccountsPage() {
       <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
         onClick={() => setIsPaymentHistoryModalOpen(false)}>
         <div
-          className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden animate-slideUp"
+          className="modal-sheet w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-6 py-5 border-b border-[color:var(--border-color)] bg-[color:var(--card-bg)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-opacity-10 rounded-lg">
-                  📋
-                </div>
+          <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <div>
                   <h3 className="text-lg font-semibold text-[color:var(--foreground)]">Riwayat Pembayaran</h3>
-                  <p className="text-sm text-[color:var(--muted)] mt-1">
+                  <p className="mt-1 break-words text-sm text-[color:var(--muted)]">
                     {activeTab === 'receivable' ? 'Riwayat Pembayaran Piutang' : 'Riwayat Pembayaran Utang'} - {paymentHistoryCustomerName}
                   </p>
                 </div>
@@ -511,12 +513,12 @@ export default function AccountsPage() {
 
           <div className="px-6 py-6 overflow-y-auto max-h-[70vh] bg-[color:var(--background)]">
             {paymentHistoryError && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="status-message status-danger mb-4">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-[color:var(--danger)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
-                  <p className="text-sm text-red-700">{paymentHistoryError}</p>
+                  <p className="text-sm">{paymentHistoryError}</p>
                 </div>
               </div>
             )}
@@ -528,16 +530,15 @@ export default function AccountsPage() {
               </div>
             ) : paymentHistory.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-6xl mb-4">📝</div>
                 <p className="text-[color:var(--muted)]">Belum ada riwayat pembayaran</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {paymentHistory.map((payment) => (
-                  <div key={payment._id} className="shadow-sm rounded-xl p-4 bg-[color:var(--card-bg)]">
-                    <div className="flex items-center justify-between">
+                  <div key={payment._id} className="section-card-tight">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-wrap items-start gap-4">
                           <div>
                             <p className="text-sm text-[color:var(--muted)]">Tanggal</p>
                             {editingPaymentId === payment._id ? (
@@ -556,13 +557,13 @@ export default function AccountsPage() {
                           <div>
                             <p className="text-sm text-[color:var(--muted)]">Jumlah</p>
                             {editingPaymentId === payment._id ? (
-                              <div className="flex items-center space-x-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[color:var(--foreground)]">Rp</span>
                                 <input
                                   type="number"
                                   value={editingAmount}
                                   onChange={(e) => setEditingAmount(e.target.value)}
-                                  className="w-32 px-2 py-1 text-sm border border-[color:var(--border-color)] rounded bg-[color:var(--card-bg)] text-[color:var(--foreground)]"
+                                  className="w-full sm:w-32 px-2 py-1 text-sm border border-[color:var(--border-color)] rounded bg-[color:var(--card-bg)] text-[color:var(--foreground)]"
                                   step="any"
                                   min="0.01"
                                 />
@@ -597,20 +598,20 @@ export default function AccountsPage() {
                           )}
                         </div>
                       </div>
-                      <div className="ml-4">
+                      <div className="ml-0 w-full sm:ml-4 sm:w-auto">
                         {editingPaymentId === payment._id ? (
-                          <div className="flex space-x-2">
+                          <div className="flex flex-wrap gap-2">
                             <button
                               onClick={handleSaveEditPayment}
                               disabled={isUpdatingPayment}
-                              className="px-3 py-1 text-sm bg-green-500 cursor-pointer text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                              className="btn-primary"
                             >
                               {isUpdatingPayment ? 'Menyimpan...' : 'Simpan'}
                             </button>
                             <button
                               onClick={handleCancelEditPayment}
                               disabled={isUpdatingPayment}
-                              className="px-3 py-1 text-sm bg-gray-500 cursor-pointer text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                              className="btn-secondary"
                             >
                               Batal
                             </button>
@@ -618,7 +619,7 @@ export default function AccountsPage() {
                         ) : (
                           <button
                             onClick={() => handleStartEditPayment(payment)}
-                            className="px-3 py-1 cursor-pointer text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            className="btn-secondary"
                           >
                             Edit
                           </button>
@@ -632,10 +633,10 @@ export default function AccountsPage() {
           </div>
 
           <div className="px-6 py-4 bg-[color:var(--card-bg)] border-t border-[color:var(--border-color)]">
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-3">
               <button
                 onClick={() => setIsPaymentHistoryModalOpen(false)}
-                className="px-5 py-2.5 text-sm cursor-pointer font-medium rounded-xl border border-[color:var(--border-color)] text-[color:var(--foreground)] hover:bg-[color:var(--surface)] transition-colors"
+                className="btn-secondary"
               >
                 Tutup
               </button>
@@ -693,18 +694,18 @@ export default function AccountsPage() {
       <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
         onClick={() => setIsPaymentModalOpen(false)}>
         <div
-          className="bg-[color:var(--card-bg)] rounded-2xl shadow-2xl border border-[color:var(--border-color)] w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
+          className="modal-sheet w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-6 py-5 border-b border-[color:var(--border-color)] bg-[color:var(--card-bg)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+          <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
                 <div className="p-2 bg-opacity-10 rounded-lg">
                   💰
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[color:var(--foreground)]">Input Pembayaran</h3>
-                  <p className="text-sm text-[color:var(--muted)] mt-1">
+                  <p className="mt-1 break-words text-sm text-[color:var(--muted)]">
                     {activeTab === 'receivable' ? 'Pembayaran Piutang' : 'Pembayaran Utang'} untuk {paymentCustomerName}
                   </p>
                 </div>
@@ -722,8 +723,8 @@ export default function AccountsPage() {
 
           <div className="px-6 py-6">
             <form id="paymentForm" onSubmit={handlePaymentSubmit} className="space-y-6">
-              <div className="p-4 bg-[color:var(--card-bg)] rounded-xl">
-                <div className="flex items-center space-x-3">
+              <div className="section-card-tight">
+                <div className="flex flex-wrap items-center gap-3">
                   <div className="p-2 bg-opacity-10 rounded-lg">
                     <svg className="w-5 h-5 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -741,23 +742,23 @@ export default function AccountsPage() {
               </div>
 
               {paymentFormError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="status-message status-danger">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-[color:var(--danger)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <p className="text-sm text-red-700">{paymentFormError}</p>
+                    <p className="text-sm">{paymentFormError}</p>
                   </div>
                 </div>
               )}
 
               {paymentFormSuccess && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="status-message status-success">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-[color:var(--success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <p className="text-sm text-green-700">{paymentFormSuccess}</p>
+                    <p className="text-sm">{paymentFormSuccess}</p>
                   </div>
                 </div>
               )}
@@ -799,7 +800,7 @@ export default function AccountsPage() {
                       setPaymentDate(e.target.value);
                       setPaymentFormError(null);
                     }}
-                    className="form-input w-full pl-4 pr-4 py-3 text-[color:var(--foreground)] bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                    className="form-input"
                     required
                   />
                 </div>
@@ -815,25 +816,25 @@ export default function AccountsPage() {
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
                   rows={3}
-                  className="form-input w-full pl-4 pr-4 py-3 text-[color:var(--foreground)] bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all resize-none"
+                  className="form-textarea"
                 />
               </div>
             </form>
           </div>
 
           <div className="px-6 py-4 bg-[color:var(--card-bg)] border-t border-[color:var(--border-color)]">
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-wrap justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setIsPaymentModalOpen(false)}
-                className="px-5 py-2.5 text-sm cursor-pointer font-medium rounded-xl border border-[color:var(--border-color)] text-[color:var(--foreground)] hover:bg-[color:var(--card-bg)] transition-colors"
+                className="btn-secondary"
               >
                 Batal
               </button>
               <button
                 form="paymentForm"
                 type="submit"
-                className="px-5 py-2.5 text-sm cursor-pointer font-medium rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors"
+                className="btn-primary"
               >
                 Simpan Pembayaran
               </button>
@@ -845,44 +846,52 @@ export default function AccountsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Laporan Piutang & Utang</h1>
-        <button
-          onClick={handleExport}
-          className="px-4 py-2 bg-green-600 cursor-pointer text-white rounded-md hover:bg-green-700 text-sm font-medium"
-        >
-          Ekspor ke Excel
-        </button>
-      </div>
+    <div className="page-shell">
+      <header className="page-header">
+        <div className="page-header-row">
+          <div className="space-y-2">
+            <p className="eyebrow">Laporan</p>
+            <h1 className="page-title">Piutang dan utang</h1>
+            <p className="page-description">
+              Laporan saldo awal, mutasi, dan pembayaran dari berbagai customer atau supplier.
+            </p>
+          </div>
+          <button
+            onClick={handleExport}
+            className="btn-primary w-full sm:w-auto"
+          >
+            Ekspor ke Excel
+          </button>
+        </div>
+      </header>
 
-      <div className="mb-4 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+      <div className="border-b border-[color:var(--border-color)]">
+        <nav className="-mb-px flex flex-wrap gap-x-6 gap-y-2" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('receivable')}
             className={`${activeTab === 'receivable'
                 ? 'border-[color:var(--primary)] text-[color:var(--primary)]'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                : 'border-transparent text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:border-[color:var(--line-strong)] cursor-pointer'
+              } py-4 px-1 border-b-2 font-medium text-sm`}
           >
-            Piutang (Receivable)
+            Piutang
           </button>
           <button
             onClick={() => setActiveTab('payable')}
             className={`${activeTab === 'payable'
                 ? 'border-[color:var(--primary)] text-[color:var(--primary)]'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                : 'border-transparent text-[color:var(--muted)] hover:text-[color:var(--foreground)] hover:border-[color:var(--line-strong)] cursor-pointer'
+              } py-4 px-1 border-b-2 font-medium text-sm`}
           >
-            Utang (Payable)
+            Utang
           </button>
         </nav>
       </div>
 
-      <div className="mb-4 flex items-end space-x-2">
+      <div className="toolbar-spread section-card-tight">
         <div className="flex-grow">
-          <label htmlFor="nameFilter" className="block text-sm font-medium text-gray-700">
-            Filter berdasarkan Nama {activeTab === 'receivable' ? 'Customer' : 'Supplier'}:
+          <label htmlFor="nameFilter" className="form-label">
+            Filter berdasarkan nama {activeTab === 'receivable' ? 'customer' : 'supplier'}
           </label>
           <input
             type="text"
@@ -890,12 +899,12 @@ export default function AccountsPage() {
             value={filterName}
             onChange={(e) => setFilterName(e.target.value)}
             placeholder={`Cari ${activeTab === 'receivable' ? 'Customer' : 'Supplier'}...`}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="form-input"
           />
         </div>
         <button
           onClick={() => setDebouncedFilterName(filterName)}
-          className="px-4 py-2 bg-[color:var(--primary)] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm font-medium h-10"
+          className="btn-primary"
         >
           Cari
         </button>
