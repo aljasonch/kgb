@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
 import ClientNav from "@/components/layout/ClientNav";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Stocklet",
-  description: "Aplikasi manajemen stok barang sederhana.",
+  title: "Stocklet | Manajemen Stok",
+  description: "Aplikasi manajemen stok, transaksi, dan laporan bisnis.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -30,38 +30,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" data-scroll-behavior="smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${montserrat.className} ${montserrat.variable} ${ibmPlexMono.variable} min-h-screen antialiased`}
       >
-        <ThemeProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-[color:var(--background)] text-[color:var(--foreground)]">
             <header className="sticky top-0 z-50">
               <ClientNav />
             </header>
-            <main className="container mx-auto p-6 mt-8 flex-grow animate-fadeIn">
-              <div className="max-w-7xl mx-auto">
-                {children}
-              </div>
+            <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+              <div className="page-shell animate-fadeIn">{children}</div>
             </main>
-            <footer
-              className="text-center py-8 mt-auto text-sm border-t border-[color:var(--border-color)]"
-              style={{
-                backgroundColor: 'var(--surface)',
-                backdropFilter: 'blur(8px)',
-                color: 'var(--muted)',
-              }}
-            >
-              <p className="font-medium">
-                &copy; {new Date().getFullYear()} Stocklet Beta. All rights reserved.
-              </p>
-              <p className="text-xs mt-1 text-muted">
-                Created by aljasonch
-              </p>
+            <footer className="border-t border-[color:var(--border-color)] px-4 py-6 sm:px-6 lg:px-8">
+              <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 text-sm text-[color:var(--muted)] sm:flex-row sm:items-center sm:justify-between">
+                <p>Stocklet</p>
+                <p className="mono text-xs">©2026 aljasonch. All Rights Reserved.</p>
+              </div>
             </footer>
-            <ThemeToggle />
-          </AuthProvider>
-        </ThemeProvider>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

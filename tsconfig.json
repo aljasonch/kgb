@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -33,9 +33,11 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts" // Ensure this line is present and uncommented
+    ,
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
+    "node_modules"
     // ".next/types" // Exclude generated types from tsc check as a workaround
   ]
 }

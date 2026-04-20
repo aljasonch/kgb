@@ -63,7 +63,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
       const response = await fetchWithAuth(`/api/items?search=${encodeURIComponent(searchTerm)}&limit=10`);
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.message || 'Failed to search items');
+        throw new Error(errData.message || 'Gagal mencari barang.');
       }
       const data = await response.json();
       setItemSearchResults(data.items || []);
@@ -109,7 +109,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
             setIsLoadingItems(true);
             try {
               const response = await fetchWithAuth(`/api/items/${currentItemId}`);
-              if (!response.ok) throw new Error('Failed to fetch item details for editing.');
+              if (!response.ok) throw new Error('Gagal memuat detail barang untuk mode edit.');
               const data = await response.json();
               if (data.item) {
                 setSelectedItemName(data.item.namaBarang);
@@ -117,7 +117,7 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
                 setItemId(data.item._id);
               }
             } catch (err) {
-              setError('Could not load item details for editing.');
+      setError('Detail barang untuk mode edit tidak dapat dimuat.');
               console.error(err);
             } finally {
               setIsLoadingItems(false);
@@ -159,17 +159,17 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
     const hargaNum = parseFloat(harga);
 
     if (!itemId) {
-      setError('Please select an item.');
+      setError('Pilih barang terlebih dahulu.');
       setIsSubmitting(false);
       return;
     }
     if (isNaN(beratNum) || beratNum <= 0) {
-      setError('Berat must be a positive number.');
+      setError('Berat harus berupa angka positif.');
       setIsSubmitting(false);
       return;
     }
     if (isNaN(hargaNum) || hargaNum < 0) {
-      setError('Harga must be a non-negative number.');
+      setError('Harga harus berupa angka nol atau lebih.');
       setIsSubmitting(false);
       return;
     }
@@ -191,10 +191,10 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || `Failed to ${isEditMode ? 'update' : 'add'} transaction`);
+        throw new Error(data.message || `${isEditMode ? 'Gagal memperbarui' : 'Gagal menambahkan'} transaksi.`);
       }
 
-      setSuccessMessage(data.message || `Transaction ${isEditMode ? 'updated' : 'added'} successfully!`);
+      setSuccessMessage(data.message || `Transaksi berhasil ${isEditMode ? 'diperbarui' : 'ditambahkan'}.`);
       if (!isEditMode) {
         setTanggal(new Date().toISOString().split('T')[0]);
         setTipe(TransactionType.PENJUALAN);
@@ -203,80 +203,80 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
       }
       onTransactionAdded();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak terduga.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const inputStyles = "appearance-none block w-full px-3 py-2.5 rounded-md shadow-sm placeholder-[color:var(--foreground)] placeholder-opacity-50  sm:text-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)] transition-all duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed";
-  const labelStyles = "block text-sm font-medium text-[color:var(--foreground)] opacity-90";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-[color:var(--card-bg)] p-6 sm:p-8 rounded-lg shadow-lg border border-[color:var(--border-color)]">
-      <h3 className="text-xl font-semibold leading-7 text-[color:var(--foreground)] mb-6">{isEditMode ? 'Edit Transaksi' : 'Tambah Transaksi Baru'}</h3>
+    <form onSubmit={handleSubmit} className="section-card space-y-6">
+      <div className="space-y-2">
+        <p className="eyebrow">{isEditMode ? 'Ubah transaksi' : 'Input transaksi'}</p>
+        <h3 className="section-title">{isEditMode ? 'Perbarui transaksi' : 'Tambah transaksi baru'}</h3>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
         <div>
-          <label htmlFor="tanggal" className={labelStyles}>Tanggal</label>
-          <input type="date" id="tanggal" value={tanggal} onChange={(e) => setTanggal(e.target.value)} required className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="tanggal" className="form-label">Tanggal</label>
+          <input type="date" id="tanggal" value={tanggal} onChange={(e) => setTanggal(e.target.value)} required className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="tipe" className={labelStyles}>Tipe Transaksi</label>
-          <select id="tipe" value={tipe} onChange={(e) => setTipe(e.target.value as TransactionType)} required className={`mt-1 ${inputStyles}`} disabled={isSubmitting}>
+          <label htmlFor="tipe" className="form-label">Tipe transaksi</label>
+          <select id="tipe" value={tipe} onChange={(e) => setTipe(e.target.value as TransactionType)} required className="form-input" disabled={isSubmitting}>
             <option value={TransactionType.PENJUALAN}>Penjualan</option>
             <option value={TransactionType.PEMBELIAN}>Pembelian</option>
           </select>
         </div>
 
         <div className="md:col-span-2">
-          <label htmlFor="customer" className={labelStyles}>{tipe === TransactionType.PENJUALAN ? 'Customer' : 'Supplier'}</label>
-          <input type="text" id="customer" value={customer} onChange={(e) => setCustomer(e.target.value)} required className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="customer" className="form-label">{tipe === TransactionType.PENJUALAN ? 'Customer' : 'Supplier'}</label>
+          <input type="text" id="customer" value={customer} onChange={(e) => setCustomer(e.target.value)} required className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="noSJ" className={labelStyles}>No. Surat Jalan (SJ)</label>
-          <input type="text" id="noSJ" value={noSJ} onChange={(e) => setNoSJ(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="noSJ" className="form-label">No. surat jalan</label>
+          <input type="text" id="noSJ" value={noSJ} onChange={(e) => setNoSJ(e.target.value)} className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="noInv" className={labelStyles}>No. Invoice (Inv)</label>
-          <input type="text" id="noInv" value={noInv} onChange={(e) => setNoInv(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="noInv" className="form-label">No. invoice</label>
+          <input type="text" id="noInv" value={noInv} onChange={(e) => setNoInv(e.target.value)} className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="noPO" className={labelStyles}>No. PO (Opsional)</label>
-          <input type="text" id="noPO" value={noPO} onChange={(e) => setNoPO(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="noPO" className="form-label">No. PO</label>
+          <input type="text" id="noPO" value={noPO} onChange={(e) => setNoPO(e.target.value)} className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="noSJSby" className={labelStyles}>No. SJ SBY (Opsional)</label>
-          <input type="text" id="noSJSby" value={noSJSby} onChange={(e) => setNoSJSby(e.target.value)} className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="noSJSby" className="form-label">No. SJ SBY</label>
+          <input type="text" id="noSJSby" value={noSJSby} onChange={(e) => setNoSJSby(e.target.value)} className="form-input" disabled={isSubmitting} />
         </div>
 
         <div className="md:col-span-2 relative">
-          <label htmlFor="itemSearch" className={labelStyles}>Barang</label>
+          <label htmlFor="itemSearch" className="form-label">Barang</label>
           <input
             type="text"
             id="itemSearch"
             value={itemSearchTerm}
             onChange={handleItemSearchChange}
             onFocus={() => { if (itemSearchTerm && itemSearchResults.length > 0) setShowItemSearchResults(true); }}
-            placeholder={isLoadingItems ? "Loading item..." : "Ketik untuk mencari barang..."}
-            className={`mt-1 ${inputStyles} placeholder-gray-400`}
+            placeholder={isLoadingItems ? "Memuat barang…" : "Ketik nama barang…"}
+            className="form-input"
             disabled={isSubmitting || isLoadingItems}
             required={!itemId}
           />
-          {isLoadingItemSearch && <p className="mt-1 text-xs text-[color:var(--foreground)] opacity-75">Mencari...</p>}
+          {isLoadingItemSearch && <p className="form-helper">Mencari barang…</p>}
 
           {showItemSearchResults && itemSearchResults.length > 0 && (
-            <ul className="absolute z-10 w-full bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+            <ul className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)]">
               {itemSearchResults.map((item) => (
                 <li
                   key={item._id.toString()}
                   onClick={() => handleSelectItem(item)}
-                  className="px-3 py-2 hover:bg-[color:var(--background)] cursor-pointer text-sm text-[color:var(--foreground)]"
+                  className="cursor-pointer px-4 py-3 text-sm text-[color:var(--foreground)] transition-colors hover:bg-[color:var(--surface)]"
                 >
                   {item.namaBarang} (Stok: {item.stokSaatIni?.toFixed(2) ?? 'N/A'})
                 </li>
@@ -284,43 +284,27 @@ export default function TransactionForm({ onTransactionAdded, isEditMode = false
             </ul>
           )}
           {itemId && selectedItemName && !showItemSearchResults && (
-            <p className="mt-1 text-sm text-green-600">Terpilih: {selectedItemName}</p>
+            <p className="form-helper text-success">Terpilih: {selectedItemName}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="berat" className={labelStyles}>Berat (kg)</label>
-          <input type="number" id="berat" value={berat} onChange={(e) => setBerat(e.target.value)} required min="0.01" step="any" className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="berat" className="form-label">Berat (kg)</label>
+          <input type="number" id="berat" value={berat} onChange={(e) => setBerat(e.target.value)} required min="0.01" step="any" className="form-input" disabled={isSubmitting} />
         </div>
 
         <div>
-          <label htmlFor="harga" className={labelStyles}>Harga per kg</label>
-          <input type="number" id="harga" value={harga} onChange={(e) => setHarga(e.target.value)} required min="0" step="any" className={`mt-1 ${inputStyles}`} disabled={isSubmitting} />
+          <label htmlFor="harga" className="form-label">Harga per kg</label>
+          <input type="number" id="harga" value={harga} onChange={(e) => setHarga(e.target.value)} required min="0" step="any" className="form-input" disabled={isSubmitting} />
         </div>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
-      {successMessage && (
-        <p className="text-sm text-green-500">{successMessage}</p>
-      )}
+      {error && <div className="status-message status-danger">{error}</div>}
+      {successMessage && <div className="status-message status-success">{successMessage}</div>}
 
-      <div className="pt-4">
-        <button type="submit" disabled={isSubmitting || isLoadingItems} className="w-full btn-primary justify-center disabled:opacity-60 disabled:cursor-not-allowed">
-          {isSubmitting ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {isEditMode ? 'Menyimpan...' : 'Menambahkan...'}
-            </>
-          ) : (
-            isEditMode ? 'Simpan Perubahan' : 'Tambah Transaksi'
-          )}
-        </button>
-      </div>
+      <button type="submit" disabled={isSubmitting || isLoadingItems} className="btn-primary w-full">
+        {isSubmitting ? (isEditMode ? 'Menyimpan perubahan…' : 'Menyimpan transaksi…') : isEditMode ? 'Simpan perubahan' : 'Tambah transaksi'}
+      </button>
     </form>
   );
 }

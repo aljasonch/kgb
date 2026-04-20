@@ -14,23 +14,19 @@ interface SummaryReportTableProps {
 }
 
 export default function SummaryReportTable({ data, isLoading, error, tipe }: SummaryReportTableProps) {
-  const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75 py-4";
-  const themedTextError = "text-center text-red-600";
-
+  const themedTextMuted = "text-center py-4 text-sm text-[color:var(--muted)]";
   if (isLoading) {
-    return <p className={themedTextMuted}>Loading summary data...</p>;
+    return <p className={themedTextMuted}>Memuat ringkasan…</p>;
   }
 
   if (error) {
     return (
-      <div className="p-4 my-4 bg-opacity-10 rounded-md">
-        <p className={themedTextError}>Error: {error}</p>
-      </div>
+      <div className="status-message status-danger">Error: {error}</div>
     );
   }
 
   if (data.length === 0) {
-    return <p className={themedTextMuted}>No {tipe.toLowerCase()} data found for the selected filters.</p>;
+    return <div className="empty-state">Tidak ada data {tipe.toLowerCase()} untuk filter yang dipilih.</div>;
   }
 
   const totalBerat = data.reduce((sum, row) => sum + row.totalBerat, 0);
@@ -38,17 +34,17 @@ export default function SummaryReportTable({ data, isLoading, error, tipe }: Sum
 
   const thClasses =
     'px-6 py-3 text-left text-xs font-medium text-[color:var(--foreground)] opacity-75 uppercase tracking-wider';
-  const tdBaseClasses = 'px-6 py-4 whitespace-nowrap text-sm';
+  const tdBaseClasses = 'px-6 py-4 text-sm';
   const tdTextMuted = `${tdBaseClasses} text-[color:var(--foreground)] opacity-75`;
   const tdTextEmphasized = `${tdBaseClasses} text-[color:var(--foreground)] font-medium`;
   const tfootTdClasses =
     'px-6 py-3 text-xs font-bold text-[color:var(--foreground)] uppercase tracking-wider';
 
   return (
-    <div className="mt-6 bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)]">
-      <div className="overflow-x-auto">
+    <div className="table-shell mt-6">
+      <div className="table-scroll">
         <table className="min-w-full divide-y divide-[color:var(--border-color)]">
-          <thead className="bg-[color:var(--background)]">
+          <thead>
             <tr>
               <th scope="col" className={thClasses}>
                 {tipe === 'PENJUALAN' ? 'Customer' : 'Supplier'}
@@ -57,9 +53,9 @@ export default function SummaryReportTable({ data, isLoading, error, tipe }: Sum
               <th scope="col" className={`${thClasses} text-right`}>Total Nilai</th>
             </tr>
           </thead>
-          <tbody className="bg-[color:var(--card-bg)] divide-y divide-[color:var(--border-color)]">
+          <tbody className="divide-y divide-[color:var(--border-color)]">
             {data.map((row) => (
-              <tr key={row._id} className="hover:bg-[color:var(--background)] transition-colors duration-150">
+              <tr key={row._id} className="transition-colors duration-150">
                 <td className={tdTextEmphasized}>{row._id || '-'}</td>
                 <td className={`${tdTextMuted} text-right`}>
                   {row.totalBerat.toLocaleString(undefined, {
@@ -77,7 +73,7 @@ export default function SummaryReportTable({ data, isLoading, error, tipe }: Sum
               </tr>
             ))}
           </tbody>
-          <tfoot className="bg-[color:var(--background)] border-t border-[color:var(--border-color)]">
+          <tfoot className="border-t border-[color:var(--border-color)] bg-[color:var(--surface)]">
             <tr>
               <td className={tfootTdClasses}>Total Keseluruhan</td>
               <td className={`${tfootTdClasses} text-right`}>

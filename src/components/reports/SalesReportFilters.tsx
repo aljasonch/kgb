@@ -49,13 +49,13 @@ function CustomSelect({ id, label, value, options, onChange, placeholder }: Cust
 
   return (
     <div className="relative" ref={containerRef}>
-      <label htmlFor={id} className="block text-sm font-medium text-[color:var(--foreground)] opacity-90 mb-1">
+      <label htmlFor={id} className="form-label">
         {label}
       </label>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-3 py-2.5 border border-[color:var(--border-color)] rounded-md shadow-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)] text-sm hover:bg-[color:var(--surface)] hover:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-150"
+        className="form-input flex items-center justify-between text-left"
       >
         <span className="block truncate">{selectedLabel}</span>
         <svg
@@ -69,11 +69,11 @@ function CustomSelect({ id, label, value, options, onChange, placeholder }: Cust
       </button>
 
       {isOpen && (
-        <ul className="absolute z-20 w-full mt-1 bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg max-h-60 overflow-auto focus:outline-none animate-fadeIn">
+        <ul className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)] focus:outline-none animate-fadeIn">
           {options.map((option) => (
             <li
               key={option.value}
-              className={`relative cursor-pointer select-none py-2 pl-3 pr-9 text-sm hover:bg-[color:var(--surface)] ${value === option.value ? 'text-[color:var(--primary)] bg-blue-50 font-medium' : 'text-[color:var(--foreground)]'
+              className={`relative cursor-pointer select-none py-3 pl-4 pr-10 text-sm hover:bg-[color:var(--surface)] ${value === option.value ? 'bg-[color:var(--accent-soft)] text-[color:var(--primary)] font-medium' : 'text-[color:var(--foreground)]'
                 }`}
               onClick={() => {
                 onChange(option.value);
@@ -219,8 +219,8 @@ export default function SalesReportFilters({
   }, []);
 
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
-  const formElementStyles = "appearance-none block w-full px-3 py-2.5 border border-[color:var(--border-color)] rounded-md shadow-sm placeholder-opacity-50 sm:text-sm bg-[color:var(--card-bg)] text-[color:var(--foreground)] hover:bg-[color:var(--surface)] hover:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] transition-all duration-150 ease-in-out";
-  const labelStyles = "block text-sm font-medium text-[color:var(--foreground)] opacity-90 mb-1";
+  const formElementStyles = "form-input";
+  const labelStyles = "form-label";
 
   const viewOptions = [
     { value: 'overall', label: 'Per Tahun (Default)' },
@@ -239,8 +239,11 @@ export default function SalesReportFilters({
   ];
 
   return (
-    <form onSubmit={handleApplyFilters} className="bg-[color:var(--card-bg)] p-6 sm:p-8 rounded-lg shadow-lg border border-[color:var(--border-color)] space-y-6">
-      <h3 className="text-xl font-semibold leading-7 text-[color:var(--foreground)]">{title}</h3>
+    <form onSubmit={handleApplyFilters} className="section-card space-y-6">
+      <div className="space-y-2">
+        <p className="eyebrow">Filter</p>
+        <h3 className="section-title">{title}</h3>
+      </div>
 
       <div>
         <CustomSelect
@@ -307,7 +310,7 @@ export default function SalesReportFilters({
       <div>
         <label htmlFor="item" className={labelStyles}>Barang</label>
         {isLoadingItems ? (
-          <p className="mt-1 text-sm text-[color:var(--foreground)] opacity-75">Loading items...</p>
+          <p className="form-helper">Memuat barang…</p>
         ) : (
           <div className="relative">
             <div className="flex items-center">
@@ -340,7 +343,7 @@ export default function SalesReportFilters({
 
             {showItemDropdown && filteredItems.length > 0 && (
               <ul
-                className="absolute z-10 w-full bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-md shadow-lg mt-1 max-h-40 overflow-auto"
+              className="absolute z-10 mt-2 max-h-40 w-full overflow-auto rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)]"
                 onMouseLeave={() => {
                   timeoutRef.current = setTimeout(() => setShowItemDropdown(false), 200);
                 }}
@@ -355,7 +358,7 @@ export default function SalesReportFilters({
                   <li
                     key={item._id.toString()}
                     onClick={() => handleSelectItem(item)}
-                    className="px-3 py-2 hover:bg-[color:var(--surface)] cursor-pointer text-sm text-[color:var(--foreground)] border-b border-[color:var(--border-color)] last:border-b-0"
+                  className="cursor-pointer border-b border-[color:var(--border-color)] px-4 py-3 text-sm text-[color:var(--foreground)] last:border-b-0 hover:bg-[color:var(--surface)]"
                   >
                     {item.namaBarang}
                   </li>
@@ -364,7 +367,7 @@ export default function SalesReportFilters({
             )}
 
             {selectedItemName && (
-              <p className="mt-1 text-xs text-[color:var(--foreground)] opacity-75">
+              <p className="form-helper">
                 Terpilih: {selectedItemName}
               </p>
             )}
@@ -385,7 +388,7 @@ export default function SalesReportFilters({
                 onChange={(e) => setNoSjType(e.target.value as 'all' | 'noSJ' | 'noSJSby')}
                 className="form-radio h-4 w-4 text-[color:var(--primary)] border-[color:var(--border-color)] focus:ring-[color:var(--primary)] transition duration-150 ease-in-out"
               />
-              <span className="ml-2 text-sm text-[color:var(--foreground)] opacity-90">
+              <span className="ml-2 text-sm text-[color:var(--ink-soft)]">
                 {type === 'all' ? 'Semua' : type === 'noSJ' ? 'No. SJ (Utama)' : 'No. SJ SBY'}
               </span>
             </label>
@@ -394,7 +397,7 @@ export default function SalesReportFilters({
       </div>
 
       <div className="pt-2">
-        <button type="submit" className="w-full flex cursor-pointer justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--primary)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-150 ease-in-out">
+        <button type="submit" className="btn-primary w-full">
           Terapkan Filter
         </button>
       </div>

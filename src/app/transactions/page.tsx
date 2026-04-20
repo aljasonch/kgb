@@ -12,17 +12,23 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Manajemen Transaksi</h1>
+    <div className="page-shell">
+      <header className="page-header">
+        <p className="eyebrow">Transaksi</p>
+        <h1 className="page-title">Manajemen transaksi</h1>
+        <p className="page-description">
+          Catat transaksi penjualan dan pembelian dari customer ataupun supplier.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
+      <div className="split-layout">
+        <div className="min-w-0">
           <TransactionForm onTransactionAdded={handleTransactionAdded} />
         </div>
-        <div className="md:col-span-2">
-          <h2 className="text-2xl font-semibold text-[color:var(--foreground)] mb-4">Daftar Transaksi</h2>
+        <div className="min-w-0 space-y-4">
+          <div className="space-y-2">
+            <p className="eyebrow">Daftar transaksi</p>
+          </div>
           <TransactionsList refreshKey={refreshKey} />
         </div>
       </div>

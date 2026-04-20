@@ -129,21 +129,28 @@ export default function ItemsReportPage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-        <button
-          onClick={handleExport}
-          className="px-4 py-2 bg-green-600 cursor-pointer text-white rounded-md hover:bg-green-700 text-sm font-medium order-last sm:order-none"
-        >
-          Ekspor ke Excel
-        </button>
-        <h1 className="text-3xl font-bold text-[color:var(--foreground)]">Laporan Stok</h1>
-        <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium text-[color:var(--muted)]">Tipe:</label>
-          <div className="relative" ref={dropdownRef}>
+    <div className="page-shell">
+      <header className="page-header">
+        <div className="page-header-row">
+          <div className="space-y-2">
+            <p className="eyebrow">Laporan</p>
+            <h1 className="page-title">Laporan stok</h1>
+            <p className="page-description">
+              Lihat ringkasan per customer atau supplier dengan filter.
+            </p>
+          </div>
+          <div className="toolbar w-full sm:w-auto">
+            <button
+              onClick={handleExport}
+              className="btn-primary"
+            >
+              Ekspor ke Excel
+            </button>
+            <label className="text-sm font-medium text-[color:var(--muted)]">Tipe</label>
+          <div className="relative w-full sm:w-auto" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-between w-40 px-4 py-2.5 rounded-xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)] text-[color:var(--foreground)] text-sm font-medium shadow-sm hover:bg-[color:var(--surface)] hover:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 transition-all duration-200"
+              className="form-input flex w-full items-center justify-between sm:w-40"
             >
               <span>{tipe === TransactionType.PENJUALAN ? 'Penjualan' : 'Pembelian'}</span>
               <svg
@@ -157,15 +164,15 @@ export default function ItemsReportPage() {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute z-10 w-full mt-2 bg-[color:var(--card-bg)] border border-[color:var(--border-color)] rounded-xl shadow-lg overflow-hidden animate-fadeIn">
+              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)] animate-fadeIn">
                 <div className="py-1">
                   <button
                     onClick={() => {
                       setTipe(TransactionType.PENJUALAN);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${tipe === TransactionType.PENJUALAN
-                      ? 'bg-blue-50 text-blue-600'
+                    className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors duration-150 ${tipe === TransactionType.PENJUALAN
+                      ? 'bg-[color:var(--accent-soft)] text-[color:var(--primary)]'
                       : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)]'
                       }`}
                   >
@@ -176,8 +183,8 @@ export default function ItemsReportPage() {
                       setTipe(TransactionType.PEMBELIAN);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${tipe === TransactionType.PEMBELIAN
-                      ? 'bg-blue-50 text-blue-600'
+                    className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors duration-150 ${tipe === TransactionType.PEMBELIAN
+                      ? 'bg-[color:var(--accent-soft)] text-[color:var(--primary)]'
                       : 'text-[color:var(--foreground)] hover:bg-[color:var(--surface)]'
                       }`}
                   >
@@ -187,11 +194,12 @@ export default function ItemsReportPage() {
               </div>
             )}
           </div>
+          </div>
         </div>
       </header>
 
       <div className="mb-6">
-        {itemsError && <p className="text-red-500">Error loading items for filter: {itemsError}</p>}
+        {itemsError && <div className="status-message status-danger">Error memuat daftar barang: {itemsError}</div>}
         <SalesReportFilters
           onFilterChange={handleFilterChange}
           items={items}
@@ -201,14 +209,12 @@ export default function ItemsReportPage() {
         />
       </div>
 
-      <div>
-        <SummaryReportTable
-          data={summaryData}
-          isLoading={isLoadingSummary}
-          error={summaryError}
-          tipe={tipe === TransactionType.PENJUALAN ? 'PENJUALAN' : 'PEMBELIAN'}
-        />
-      </div>
+      <SummaryReportTable
+        data={summaryData}
+        isLoading={isLoadingSummary}
+        error={summaryError}
+        tipe={tipe === TransactionType.PENJUALAN ? 'PENJUALAN' : 'PEMBELIAN'}
+      />
     </div>
   );
 }

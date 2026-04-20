@@ -10,9 +10,7 @@ interface SalesReportTableProps {
 }
 
 export default function SalesReportTable({ reportData, isLoading, error }: SalesReportTableProps) {
-  const themedTextMuted = "text-center text-[color:var(--foreground)] opacity-75 py-4";
-  const themedTextError = "text-center text-red-600";
-
+  const themedTextMuted = "text-center py-4 text-sm text-[color:var(--muted)]";
   const rowsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -24,19 +22,17 @@ export default function SalesReportTable({ reportData, isLoading, error }: Sales
   }, [totalPages, currentPage]);
 
   if (isLoading) {
-    return <p className={themedTextMuted}>Loading report data...</p>;
+    return <p className={themedTextMuted}>Memuat data laporan…</p>;
   }
 
   if (error) {
     return (
-      <div className="p-4 my-4 bg-opacity-10 rounded-md">
-        <p className={themedTextError}>Error: {error}</p>
-      </div>
+      <div className="status-message status-danger">Error: {error}</div>
     );
   }
 
   if (reportData.length === 0) {
-    return <p className={themedTextMuted}>No sales data found for the selected filters.</p>;
+    return <div className="empty-state">Tidak ada data penjualan untuk filter yang dipilih.</div>;
   }
 
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -49,16 +45,16 @@ export default function SalesReportTable({ reportData, isLoading, error }: Sales
   const totalDenganPPN = totalNilai + totalPPN;
 
   const thClasses = "px-6 py-3 text-left text-xs font-medium text-[color:var(--foreground)] opacity-75 uppercase tracking-wider";
-  const tdBaseClasses = "px-6 py-4 whitespace-nowrap text-sm";
+  const tdBaseClasses = "px-6 py-4 text-sm";
   const tdTextMuted = `${tdBaseClasses} text-[color:var(--foreground)] opacity-75`;
   const tdTextEmphasized = `${tdBaseClasses} text-[color:var(--foreground)] font-medium`;
   const tfootTdClasses = "px-6 py-3 text-xs font-bold text-[color:var(--foreground)] uppercase tracking-wider";
 
   return (
-    <div className={`mt-6 bg-[color:var(--card-bg)] shadow-lg overflow-hidden sm:rounded-lg border border-[color:var(--border-color)] transition-opacity duration-500 ease-in-out ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="overflow-x-auto">
+    <div className={`table-shell mt-6 transition-opacity duration-500 ease-in-out ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+      <div className="table-scroll">
         <table className="min-w-full divide-y divide-[color:var(--border-color)]">
-          <thead className="bg-[color:var(--background)]">
+          <thead>
             <tr>
               <th scope="col" className={thClasses}>Tanggal</th>
               <th scope="col" className={thClasses}>Customer</th>
@@ -74,9 +70,9 @@ export default function SalesReportTable({ reportData, isLoading, error }: Sales
               <th scope="col" className={thClasses}>No.SJ SBY</th>
             </tr>
           </thead>
-          <tbody className="bg-[color:var(--card-bg)] divide-y divide-[color:var(--border-color)]">
+          <tbody className="divide-y divide-[color:var(--border-color)]">
             {currentData.map((tx) => (
-              <tr key={tx._id as string} className="hover:bg-[color:var(--background)] transition-colors duration-150">
+              <tr key={tx._id as string} className="transition-colors duration-150">
                 <td className={tdTextMuted}>{new Date(tx.tanggal).toLocaleDateString('id-ID')}</td>
                 <td className={tdTextEmphasized}>{tx.customer}</td>
                 <td className={tdTextMuted}>{tx.noSJ}</td>
@@ -106,7 +102,7 @@ export default function SalesReportTable({ reportData, isLoading, error }: Sales
               </tr>
             ))}
           </tbody>
-          <tfoot className="bg-[color:var(--background)] border-t border-[color:var(--border-color)]">
+          <tfoot className="border-t border-[color:var(--border-color)] bg-[color:var(--surface)]">
             <tr>
               <td colSpan={5} className={`${tfootTdClasses} text-left`}>Total Keseluruhan</td>
               <td className={`${tfootTdClasses} text-right`}>
@@ -128,21 +124,21 @@ export default function SalesReportTable({ reportData, isLoading, error }: Sales
         </table>
       </div>
 
-      <div className="flex justify-between items-center p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--border-color)] p-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 text-sm cursor-pointer font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent"
+          className="btn-secondary"
         >
-          Prev
+          Sebelumnya
         </button>
-        <span className="text-sm text-[color:var(--foreground)]">{currentPage} / {totalPages}</span>
+        <span className="mono text-sm text-[color:var(--foreground)]">{currentPage} / {totalPages}</span>
         <button
           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 text-sm cursor-pointer font-medium rounded-md bg-[color:var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent"
+          className="btn-secondary"
         >
-          Next
+          Berikutnya
         </button>
       </div>
     </div>
