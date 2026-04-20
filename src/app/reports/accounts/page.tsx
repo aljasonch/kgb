@@ -484,20 +484,28 @@ export default function AccountsPage() {
     if (!isPaymentHistoryModalOpen) return null;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
+      <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-[rgba(24,23,19,0.18)] p-3 sm:p-6 animate-fadeIn"
         onClick={() => setIsPaymentHistoryModalOpen(false)}>
         <div
-          className="modal-sheet w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden animate-slideUp"
+          className="modal-sheet my-auto flex w-full max-w-4xl flex-col overflow-hidden animate-slideUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div>
-                  <h3 className="text-lg font-semibold text-[color:var(--foreground)]">Riwayat Pembayaran</h3>
-                  <p className="mt-1 break-words text-sm text-[color:var(--muted)]">
-                    {activeTab === 'receivable' ? 'Riwayat Pembayaran Piutang' : 'Riwayat Pembayaran Utang'} - {paymentHistoryCustomerName}
-                  </p>
+                <h3 className="text-lg font-semibold text-[color:var(--foreground)]">Riwayat Pembayaran</h3>
+                <p className="mt-1 break-words text-sm text-[color:var(--muted)]">
+                  {activeTab === 'receivable' ? 'Riwayat Pembayaran Piutang' : 'Riwayat Pembayaran Utang'}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface)] px-3 py-1 text-xs font-medium text-[color:var(--foreground)]">
+                    {paymentHistoryCustomerName}
+                  </span>
+                  {!isLoadingPaymentHistory && paymentHistory.length > 0 && (
+                    <span className="inline-flex items-center rounded-full border border-[color:var(--border-color)] px-3 py-1 text-xs text-[color:var(--muted)]">
+                      {paymentHistory.length} transaksi
+                    </span>
+                  )}
                 </div>
               </div>
               <button
@@ -511,7 +519,7 @@ export default function AccountsPage() {
             </div>
           </div>
 
-          <div className="px-6 py-6 overflow-y-auto max-h-[70vh] bg-[color:var(--background)]">
+          <div className="min-h-0 flex-1 overflow-y-auto bg-[color:var(--background)] px-6 py-6">
             {paymentHistoryError && (
               <div className="status-message status-danger mb-4">
                 <div className="flex items-start gap-2">
@@ -529,89 +537,97 @@ export default function AccountsPage() {
                 <p className="mt-2 text-[color:var(--muted)]">Memuat riwayat pembayaran...</p>
               </div>
             ) : paymentHistory.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="empty-state py-10">
                 <p className="text-[color:var(--muted)]">Belum ada riwayat pembayaran</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {paymentHistory.map((payment) => (
                   <div key={payment._id} className="section-card-tight">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-start gap-4">
-                          <div>
-                            <p className="text-sm text-[color:var(--muted)]">Tanggal</p>
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 flex-1 space-y-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <p className="eyebrow">Tanggal pembayaran</p>
                             {editingPaymentId === payment._id ? (
                               <input
                                 type="date"
                                 value={editingDate}
                                 onChange={(e) => setEditingDate(e.target.value)}
-                                className="px-2 py-1 text-sm border border-[color:var(--border-color)] rounded bg-[color:var(--card-bg)] text-[color:var(--foreground)]"
+                                className="form-input h-10 min-h-10 max-w-[220px] py-2"
                               />
                             ) : (
-                              <p className="font-medium text-[color:var(--foreground)]">
-                                {new Date(payment.paymentDate).toLocaleDateString('id-ID')}
+                              <p className="text-sm font-semibold text-[color:var(--foreground)] sm:text-base">
+                                {new Date(payment.paymentDate).toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                })}
                               </p>
                             )}
                           </div>
-                          <div>
-                            <p className="text-sm text-[color:var(--muted)]">Jumlah</p>
+
+                          <div className="rounded-xl border border-[color:var(--border-color)] bg-[color:var(--surface)] px-3 py-2">
+                            <p className="text-xs text-[color:var(--muted)]">Jumlah</p>
                             {editingPaymentId === payment._id ? (
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-[color:var(--foreground)]">Rp</span>
+                              <div className="mt-1 flex items-center gap-2">
+                                <span className="text-sm font-semibold text-[color:var(--foreground)]">Rp</span>
                                 <input
                                   type="number"
                                   value={editingAmount}
                                   onChange={(e) => setEditingAmount(e.target.value)}
-                                  className="w-full sm:w-32 px-2 py-1 text-sm border border-[color:var(--border-color)] rounded bg-[color:var(--card-bg)] text-[color:var(--foreground)]"
+                                  className="form-input h-9 min-h-9 w-36 py-1"
                                   step="any"
                                   min="0.01"
                                 />
                               </div>
                             ) : (
-                              <p className="font-medium text-[color:var(--foreground)]">
+                              <p className="mt-1 text-sm font-semibold text-[color:var(--foreground)] sm:text-base">
                                 Rp {payment.amount.toLocaleString('id-ID')}
                               </p>
                             )}
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-[color:var(--muted)]">Keterangan</p>
-                            {editingPaymentId === payment._id ? (
-                              <input
-                                type="text"
-                                value={editingNotes}
-                                onChange={(e) => setEditingNotes(e.target.value)}
-                                placeholder="Tambahkan keterangan..."
-                                className="w-full px-2 py-1 text-sm border border-[color:var(--border-color)] rounded bg-[color:var(--card-bg)] text-[color:var(--foreground)]"
-                              />
-                            ) : (
-                              <p className="text-[color:var(--foreground)]">
-                                {payment.notes || '-'}
-                              </p>
-                            )}
-                          </div>
                         </div>
-                        <div className="mt-2 text-xs text-[color:var(--muted)]">
-                          Dibuat: {new Date(payment.createdAt).toLocaleString('id-ID')}
+
+                        <div className="rounded-xl border border-[color:var(--border-color)] bg-[color:var(--card-bg)] px-3 py-2">
+                          <p className="text-xs text-[color:var(--muted)]">Keterangan</p>
+                          {editingPaymentId === payment._id ? (
+                            <input
+                              type="text"
+                              value={editingNotes}
+                              onChange={(e) => setEditingNotes(e.target.value)}
+                              placeholder="Tambahkan keterangan..."
+                              className="form-input mt-1 h-10 min-h-10 py-2"
+                            />
+                          ) : (
+                            <p className="mt-1 text-sm text-[color:var(--foreground)] break-words">
+                              {payment.notes || '-'}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[color:var(--muted)]">
+                          <span>Dibuat: {new Date(payment.createdAt).toLocaleString('id-ID')}</span>
                           {payment.updatedAt !== payment.createdAt && (
-                            <span> • Diubah: {new Date(payment.updatedAt).toLocaleString('id-ID')}</span>
+                            <span>Diubah: {new Date(payment.updatedAt).toLocaleString('id-ID')}</span>
                           )}
                         </div>
                       </div>
-                      <div className="ml-0 w-full sm:ml-4 sm:w-auto">
+
+                      <div className="w-full lg:w-auto">
                         {editingPaymentId === payment._id ? (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-col">
                             <button
                               onClick={handleSaveEditPayment}
                               disabled={isUpdatingPayment}
-                              className="btn-primary"
+                              className="btn-primary w-full lg:w-auto"
                             >
                               {isUpdatingPayment ? 'Menyimpan...' : 'Simpan'}
                             </button>
                             <button
                               onClick={handleCancelEditPayment}
                               disabled={isUpdatingPayment}
-                              className="btn-secondary"
+                              className="btn-secondary w-full lg:w-auto"
                             >
                               Batal
                             </button>
@@ -619,7 +635,7 @@ export default function AccountsPage() {
                         ) : (
                           <button
                             onClick={() => handleStartEditPayment(payment)}
-                            className="btn-secondary"
+                            className="btn-secondary w-full lg:w-auto"
                           >
                             Edit
                           </button>
@@ -691,10 +707,10 @@ export default function AccountsPage() {
     };
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn"
+      <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-[rgba(24,23,19,0.18)] p-3 sm:p-6 animate-fadeIn"
         onClick={() => setIsPaymentModalOpen(false)}>
         <div
-          className="modal-sheet w-full max-w-lg mx-4 overflow-hidden animate-slideUp"
+          className="modal-sheet my-auto flex w-full max-w-lg flex-col overflow-hidden animate-slideUp max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-6 py-5 border-b border-[color:var(--border-color)]">
@@ -721,7 +737,7 @@ export default function AccountsPage() {
             </div>
           </div>
 
-          <div className="px-6 py-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
             <form id="paymentForm" onSubmit={handlePaymentSubmit} className="space-y-6">
               <div className="section-card-tight">
                 <div className="flex flex-wrap items-center gap-3">
