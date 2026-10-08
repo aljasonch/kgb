@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 
 interface SummaryRow {
   _id: string;
@@ -35,8 +35,10 @@ export default function SummaryReportTable({
   const [detailsCache, setDetailsCache] = useState<Record<string, CustomerItemRow[]>>({});
   const [loadingRows, setLoadingRows] = useState<Record<string, boolean>>({});
   const [errorRows, setErrorRows] = useState<Record<string, string | null>>({});
+  const activeGenerationRef = useRef(0);
 
   useEffect(() => {
+    activeGenerationRef.current += 1;
     setExpandedRows({});
     setDetailsCache({});
     setLoadingRows({});
@@ -56,17 +58,22 @@ export default function SummaryReportTable({
       return;
     }
 
+    const currentGen = activeGenerationRef.current;
     setLoadingRows((prev) => ({ ...prev, [customer]: true }));
     setErrorRows((prev) => ({ ...prev, [customer]: null }));
 
     try {
       const items = await onFetchCustomerItems(customer);
+      if (activeGenerationRef.current !== currentGen) return;
       setDetailsCache((prev) => ({ ...prev, [customer]: items }));
     } catch (err: unknown) {
+      if (activeGenerationRef.current !== currentGen) return;
       const message = err instanceof Error ? err.message : 'Gagal memuat rincian barang';
       setErrorRows((prev) => ({ ...prev, [customer]: message }));
     } finally {
-      setLoadingRows((prev) => ({ ...prev, [customer]: false }));
+      if (activeGenerationRef.current === currentGen) {
+        setLoadingRows((prev) => ({ ...prev, [customer]: false }));
+      }
     }
   };
 
@@ -119,7 +126,7 @@ export default function SummaryReportTable({
 
               return (
                 <Fragment key={row._id || 'unknown'}>
-                  <tr className="transition-colors duration-150">
+                  <tr className="hover:bg-[color:var(--surface)] transition-colors duration-150">
                     <td className={tdTextEmphasized}>
                       {onFetchCustomerItems ? (
                         <button
