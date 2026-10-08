@@ -10,7 +10,7 @@ interface MatchQuery {
   tipe?: TransactionType;
   tanggal?: { $gte: Date; $lte: Date };
   item?: mongoose.Types.ObjectId;
-  customer?: { $regex: RegExp };
+  customer?: string | { $regex: RegExp };
   $and?: Array<Record<string, unknown>>;
 }
 
@@ -18,6 +18,14 @@ interface SummaryRow {
   _id: string | null;
   totalBerat: number;
   totalNilai: number;
+}
+
+interface ItemRow {
+  _id: mongoose.Types.ObjectId | string | null;
+  namaBarang: string;
+  totalBerat: number;
+  totalNilai: number;
+  count: number;
 }
 
 const getItemsSummaryHandler = async (
@@ -38,6 +46,8 @@ const getItemsSummaryHandler = async (
   const endDate = searchParams.get('endDate');
   const tipe = searchParams.get('tipe') as TransactionType | null;
   const noSjType = searchParams.get('noSjType') as 'all' | 'noSJ' | 'noSJSby' | null;
+  const groupBy = searchParams.get('groupBy');
+  const exactCustomer = searchParams.get('exactCustomer');
 
   const matchQuery: MatchQuery = {
     createdBy: new mongoose.Types.ObjectId(userId),
@@ -86,6 +96,25 @@ const getItemsSummaryHandler = async (
   }
 
   try {
+    if (groupBy === 'item' && exactCustomer) {
+      matchQuery.customer = exactCustomer;
+      const items = await Transaction.aggregate<ItemRow>([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: '$item',
+            namaBarang: { $first: '$namaBarangSnapshot' },
+            totalBerat: { $sum: '$berat' },
+            totalNilai: { $sum: '$totalHarga' },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalBerat: -1 } },
+      ]);
+
+      return { status: 200, data: { items } };
+    }
+
     const summary = await Transaction.aggregate<SummaryRow>([
       { $match: matchQuery },
       {
