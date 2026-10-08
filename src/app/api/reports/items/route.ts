@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Transaction from '@/models/Transaction';
+import Item from '@/models/Item';
 import { TransactionType } from '@/types/enums';
 import mongoose from 'mongoose';
 import { withAuthStatic, HandlerResult } from '@/lib/authUtils';
@@ -100,6 +101,7 @@ const getItemsSummaryHandler = async (
       matchQuery.customer = exactCustomer;
       const items = await Transaction.aggregate<ItemRow>([
         { $match: matchQuery },
+        { $sort: { tanggal: -1, _id: -1 } },
         {
           $group: {
             _id: '$item',
@@ -109,6 +111,22 @@ const getItemsSummaryHandler = async (
             count: { $sum: 1 },
           },
         },
+        {
+          $lookup: {
+            from: Item.collection.name,
+            localField: '_id',
+            foreignField: '_id',
+            as: 'itemDoc',
+          },
+        },
+        {
+          $addFields: {
+            namaBarang: {
+              $ifNull: [{ $arrayElemAt: ['$itemDoc.namaBarang', 0] }, '$namaBarang'],
+            },
+          },
+        },
+        { $project: { itemDoc: 0 } },
         { $sort: { totalBerat: -1 } },
       ]);
 
