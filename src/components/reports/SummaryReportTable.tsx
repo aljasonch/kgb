@@ -128,11 +128,11 @@ export default function SummaryReportTable({
                 <Fragment key={row._id || 'unknown'}>
                   <tr className="hover:bg-[color:var(--surface)] transition-colors duration-150">
                     <td className={tdTextEmphasized}>
-                      {onFetchCustomerItems ? (
+                      {onFetchCustomerItems && customerKey ? (
                         <button
                           type="button"
                           onClick={() => handleToggle(customerKey)}
-                          className="inline-flex items-center gap-2 text-left hover:text-[color:var(--primary)] transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-2 text-left hover:text-[color:var(--primary)] focus-visible:ring-1 focus-visible:ring-[color:var(--primary)] rounded-sm transition-colors cursor-pointer"
                           aria-expanded={isExpanded}
                           aria-label={`${isExpanded ? 'Tutup' : 'Buka'} rincian ${row._id || '-'}`}
                         >

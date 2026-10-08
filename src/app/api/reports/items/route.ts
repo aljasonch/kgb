@@ -101,11 +101,10 @@ const getItemsSummaryHandler = async (
       matchQuery.customer = exactCustomer;
       const items = await Transaction.aggregate<ItemRow>([
         { $match: matchQuery },
-        { $sort: { tanggal: -1, _id: -1 } },
         {
           $group: {
             _id: '$item',
-            namaBarang: { $first: '$namaBarangSnapshot' },
+            namaBarang: { $max: '$namaBarangSnapshot' },
             totalBerat: { $sum: '$berat' },
             totalNilai: { $sum: '$totalHarga' },
             count: { $sum: 1 },

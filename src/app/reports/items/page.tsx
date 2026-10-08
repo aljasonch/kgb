@@ -149,7 +149,7 @@ export default function ItemsReportPage() {
   );
 
   const handleFilterChange = useCallback((newFilters: FiltersInput) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters(newFilters as FilterState);
   }, []);
 
   return (
