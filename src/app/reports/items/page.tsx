@@ -1,7 +1,7 @@
 'use client';
 
 import SalesReportFilters from '@/components/reports/SalesReportFilters';
-import SummaryReportTable from '@/components/reports/SummaryReportTable';
+import SummaryReportTable, { CustomerItemRow } from '@/components/reports/SummaryReportTable';
 import { IItem } from '@/models/Item';
 import { TransactionType } from '@/types/enums';
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -124,6 +124,30 @@ export default function ItemsReportPage() {
     }
   }, [filters, tipe, fetchSummaryData]);
 
+  const fetchCustomerItems = useCallback(
+    async (customer: string): Promise<CustomerItemRow[]> => {
+      const queryParams = new URLSearchParams();
+      if (filters.year) queryParams.append('year', filters.year);
+      if (filters.month) queryParams.append('month', filters.month);
+      if (filters.itemId) queryParams.append('itemId', filters.itemId);
+      if (filters.startDate) queryParams.append('startDate', filters.startDate);
+      if (filters.endDate) queryParams.append('endDate', filters.endDate);
+      if (filters.noSjType) queryParams.append('noSjType', filters.noSjType);
+      queryParams.append('tipe', tipe);
+      queryParams.append('groupBy', 'item');
+      queryParams.append('exactCustomer', customer);
+
+      const response = await fetchWithAuth(`/api/reports/items?${queryParams.toString()}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || data.error || 'Failed to fetch customer items');
+      }
+      const data = await response.json();
+      return data.items || [];
+    },
+    [filters, tipe]
+  );
+
   const handleFilterChange = useCallback((newFilters: FiltersInput) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
@@ -214,6 +238,7 @@ export default function ItemsReportPage() {
         isLoading={isLoadingSummary}
         error={summaryError}
         tipe={tipe === TransactionType.PENJUALAN ? 'PENJUALAN' : 'PEMBELIAN'}
+        onFetchCustomerItems={fetchCustomerItems}
       />
     </div>
   );
